@@ -15,9 +15,26 @@ export const productTypeDefs = gql`
   }
 
   extend type Query {
-    products: [Product!]!
-    product(id: ID!): Product
-  }
+  products(
+    search: String
+    categoryId: ID
+    minPrice: Float
+    maxPrice: Float
+    sortBy: String
+    sortOrder: String
+    page: Int = 1
+    limit: Int = 10
+  ): ProductPagination!
+
+  product(id: ID!): Product
+}
+
+type ProductPagination {
+  items: [Product!]!
+  total: Int!
+  page: Int!
+  totalPages: Int!
+}
 
   extend type Mutation {
     createProduct(

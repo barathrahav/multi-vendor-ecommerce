@@ -24,16 +24,65 @@ export const createProductService = async (
   });
 };
 
-export const getProductsService = async () => {
-  return prisma.product.findMany({
-    include: {
-      vendor: true,
-      category: true,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-  });
+export const getProductsService = async (
+  filters: any
+) => {
+  const {
+    search,
+    categoryId,
+    minPrice,
+    maxPrice,
+    sortBy = "createdAt",
+    sortOrder = "desc",
+    page = 1,
+    limit = 10,
+  } = filters;
+
+  const where: any = {};
+
+  if (search) {
+    where.name = {
+      contains: search,
+      mode: "insensitive",
+    };
+  }
+
+  if (categoryId) {
+    where.categoryId = categoryId;
+  }
+
+  if (minPrice || maxPrice) {
+    where.price = {};
+
+    if (minPrice) where.price.gte = minPrice;
+    if (maxPrice) where.price.lte = maxPrice;
+  }
+
+  const skip = (page - 1) * limit;
+
+  const [items, total] = await Promise.all([
+    prisma.product.findMany({
+      where,
+      include: {
+        vendor: true,
+        category: true,
+      },
+      orderBy: {
+        [sortBy]: sortOrder,
+      },
+      skip,
+      take: limit,
+    }),
+
+    prisma.product.count({ where }),
+  ]);
+
+  return {
+    items,
+    total,
+    page,
+    totalPages: Math.ceil(total / limit),
+  };
 };
 
 export const getProductByIdService = async (id: string) => {
