@@ -45,3 +45,27 @@ export const getProductByIdService = async (id: string) => {
     },
   });
 };
+
+export const updateProductService = async (
+  id: string,
+  data: any
+) => {
+  return prisma.product.update({
+    where: { id },
+    data,
+    include: {
+      vendor: true,
+      category: true,
+    },
+  });
+};
+
+export const deleteProductService = async (
+  id: string
+) => {
+  await prisma.product.delete({
+    where: { id },
+  });
+
+  return "Product deleted successfully";
+};
