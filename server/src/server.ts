@@ -1,25 +1,33 @@
-import { ApolloServer } from "apollo-server-express";
-import app from "./app";
+import express from "express";
+import cors from "cors";
+import { ApolloServer } from "@apollo/server";
+import { expressMiddleware } from "@as-integrations/express4";
 import { typeDefs } from "./graphql/schema";
 import { resolvers } from "./graphql/resolvers";
+import { createContext } from "./context";
 
 const startServer = async () => {
+  const app = express();
+
+  app.use(cors());
+  app.use(express.json());
+
   const server = new ApolloServer({
     typeDefs,
     resolvers,
-    introspection: true,
   });
 
   await server.start();
 
-  server.applyMiddleware({ app });
+  app.use(
+    "/graphql",
+    expressMiddleware(server, {
+      context: createContext,
+    })
+  );
 
-  const PORT = 5000;
-
-  app.listen(PORT, () => {
-    console.log(
-      `🚀 Server running at http://localhost:${PORT}${server.graphqlPath}`
-    );
+  app.listen(5000, () => {
+    console.log("🚀 Server running at http://localhost:5000/graphql");
   });
 };
 

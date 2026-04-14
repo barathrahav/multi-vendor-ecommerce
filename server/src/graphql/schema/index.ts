@@ -1,4 +1,4 @@
-import { gql } from "apollo-server-express";
+import { gql } from "graphql-tag";
 import { authTypeDefs } from "./auth.schema";
 
 const baseTypeDefs = gql`
@@ -17,6 +17,10 @@ const baseTypeDefs = gql`
 
   type Query {
     hello: String!
+  }
+
+  extend type Query {
+    me: User
   }
 
   type Mutation
