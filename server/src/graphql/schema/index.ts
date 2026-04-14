@@ -3,6 +3,7 @@ import { authTypeDefs } from "./auth.schema";
 import { categoryTypeDefs } from "./category.schema";
 import { productTypeDefs } from "./product.schema";
 import { cartTypeDefs } from "./cart.schema";
+import { orderTypeDefs } from "./order.schema";
 
 const baseTypeDefs = gql`
   enum Role {
@@ -35,5 +36,6 @@ export const typeDefs = [
   categoryTypeDefs,
   productTypeDefs,
   cartTypeDefs,
+  orderTypeDefs,
 ];
 

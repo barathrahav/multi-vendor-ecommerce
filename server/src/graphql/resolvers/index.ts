@@ -1,6 +1,7 @@
 import { authResolvers } from "./auth.resolver";
 import { cartResolvers } from "./cart.resolver";
 import { categoryResolvers } from "./category.resolver";
+import { orderResolvers } from "./order.resolver";
 import { productResolvers } from "./product.resolver";
 
 export const resolvers = {
@@ -14,6 +15,7 @@ export const resolvers = {
     ...categoryResolvers.Query,
     ...productResolvers.Query,
     ...cartResolvers.Query,
+    ...orderResolvers.Query,
 
   },
 
@@ -22,5 +24,6 @@ export const resolvers = {
     ...categoryResolvers.Mutation,
     ...productResolvers.Mutation,
     ...cartResolvers.Mutation,
+    ...orderResolvers.Mutation,
   },
 };
