@@ -43,6 +43,7 @@ export const placeOrderService = async (
       data: {
         userId,
         totalAmount,
+        status: "PENDING_PAYMENT",
         items: {
           create: cart.items.map(
   (item: typeof cart.items[number]) => ({
@@ -126,6 +127,14 @@ export const updateOrderStatusService = async (
   orderId: string,
   status: string
 ) => {
+  const existingOrder = await prisma.order.findUnique({
+    where: { id: orderId },
+  });
+
+  if (!existingOrder) {
+    throw new Error("Order not found");
+  }
+
   return prisma.order.update({
     where: { id: orderId },
     data: {

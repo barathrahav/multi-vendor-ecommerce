@@ -86,7 +86,7 @@ model Order {
   id          String       @id @default(uuid())
   userId      String
   totalAmount Float
-  status      OrderStatus  @default(PENDING)
+  status      OrderStatus  @default(PENDING_PAYMENT)
 
   user        User         @relation(fields: [userId], references: [id])
   items       OrderItem[]

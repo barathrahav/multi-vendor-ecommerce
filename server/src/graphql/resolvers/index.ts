@@ -3,6 +3,7 @@ import { cartResolvers } from "./cart.resolver";
 import { categoryResolvers } from "./category.resolver";
 import { orderResolvers } from "./order.resolver";
 import { productResolvers } from "./product.resolver";
+import { paymentResolvers } from "./payment.resolver";
 
 export const resolvers = {
   Query: {
@@ -25,5 +26,6 @@ export const resolvers = {
     ...productResolvers.Mutation,
     ...cartResolvers.Mutation,
     ...orderResolvers.Mutation,
+    ...paymentResolvers.Mutation, 
   },
 };
