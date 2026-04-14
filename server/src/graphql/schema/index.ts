@@ -1,6 +1,7 @@
 import { gql } from "graphql-tag";
 import { authTypeDefs } from "./auth.schema";
 import { categoryTypeDefs } from "./category.schema";
+import { productTypeDefs } from "./product.schema";
 
 
 const baseTypeDefs = gql`
@@ -32,5 +33,6 @@ export const typeDefs = [
   baseTypeDefs,
   authTypeDefs,
   categoryTypeDefs,
+  productTypeDefs,
 ];
 
