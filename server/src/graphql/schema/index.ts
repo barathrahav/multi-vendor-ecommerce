@@ -2,7 +2,7 @@ import { gql } from "graphql-tag";
 import { authTypeDefs } from "./auth.schema";
 import { categoryTypeDefs } from "./category.schema";
 import { productTypeDefs } from "./product.schema";
-
+import { cartTypeDefs } from "./cart.schema";
 
 const baseTypeDefs = gql`
   enum Role {
@@ -34,5 +34,6 @@ export const typeDefs = [
   authTypeDefs,
   categoryTypeDefs,
   productTypeDefs,
+  cartTypeDefs,
 ];
 
