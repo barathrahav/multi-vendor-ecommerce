@@ -1,4 +1,5 @@
 import { authResolvers } from "./auth.resolver";
+import { categoryResolvers } from "./category.resolver";
 
 export const resolvers = {
   Query: {
@@ -10,5 +11,6 @@ export const resolvers = {
 
   Mutation: {
     ...authResolvers.Mutation,
+    ...categoryResolvers.Mutation,
   },
 };

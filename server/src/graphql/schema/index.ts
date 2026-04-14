@@ -1,5 +1,7 @@
 import { gql } from "graphql-tag";
 import { authTypeDefs } from "./auth.schema";
+import { categoryTypeDefs } from "./category.schema";
+
 
 const baseTypeDefs = gql`
   enum Role {
@@ -29,4 +31,6 @@ const baseTypeDefs = gql`
 export const typeDefs = [
   baseTypeDefs,
   authTypeDefs,
+  categoryTypeDefs,
 ];
+
