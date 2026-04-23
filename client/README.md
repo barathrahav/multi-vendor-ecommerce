@@ -1,73 +1,220 @@
-# React + TypeScript + Vite
+# 🎨 Multi-Vendor E-Commerce Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Frontend application for a full-stack multi-vendor e-commerce platform built using React, TypeScript, and GraphQL.
 
-Currently, two official plugins are available:
+---
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🚀 Tech Stack
 
-## React Compiler
+* React (Vite)
+* TypeScript
+* Apollo Client (GraphQL)
+* React Router
+* Tailwind CSS
+* React Hook Form + Zod
+* React Hot Toast
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+---
 
-## Expanding the ESLint configuration
+## 📦 Features
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### 🔐 Authentication
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+* Login & Registration
+* JWT-based authentication
+* Persistent login using localStorage
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+---
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 🛍️ Product Browsing
+
+* Product listing page
+* Product details page
+* Search, filter, and pagination
+* Category-based browsing
+
+---
+
+### 🧺 Cart System
+
+* Add to cart
+* Update quantity
+* Remove items
+* Clear cart
+* Cart total calculation
+
+---
+
+### 💳 Checkout & Payment
+
+* Checkout flow
+* Razorpay integration
+* Payment verification
+* Order success page
+
+---
+
+### 📦 Orders
+
+* Order history page
+* View previous orders and items
+
+---
+
+### 🧑‍💼 Vendor Dashboard
+
+* Create product
+* View own products
+* Manage product inventory
+
+---
+
+### 👑 Admin Panel
+
+* Category management
+* Add new categories
+* View system-level data
+
+---
+
+### 🎨 UI/UX Enhancements
+
+* Toast notifications (success/error)
+* Loading spinners
+* Empty states
+* Responsive design (mobile-friendly)
+
+---
+
+## 🧱 Project Structure
+
+```id="1yhr9a"
+src/
+├── apollo/
+├── components/
+│   ├── common/
+│   └── layout/
+├── features/
+│   ├── auth/
+│   ├── products/
+│   ├── cart/
+│   ├── orders/
+│   ├── vendor/
+│   └── admin/
+├── hooks/
+├── layouts/
+├── routes/
+├── utils/
+└── main.tsx
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+---
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## ⚙️ Setup Instructions
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+### 1. Clone Repository
+
+```bash id="2n9v3r"
+git clone https://github.com/YOUR_USERNAME/multi-vendor-ecommerce.git
+cd client
 ```
+
+---
+
+### 2. Install Dependencies
+
+```bash id="z5lh2m"
+npm install
+```
+
+---
+
+### 3. Setup Environment Variables
+
+Create `.env` file:
+
+```env id="p0lg9z"
+VITE_API_URL=http://localhost:5000/graphql
+VITE_RAZORPAY_KEY_ID=your_key_id
+```
+
+---
+
+### 4. Run Application
+
+```bash id="j8w3tp"
+npm run dev
+```
+
+App runs at:
+
+```id="l1w4fd"
+http://localhost:5173
+```
+
+---
+
+## 🔗 API Integration
+
+Frontend communicates with backend via GraphQL using Apollo Client.
+
+```id="9z5kcf"
+Apollo Client → GraphQL API → Backend
+```
+
+---
+
+## 🔐 Authentication Flow
+
+```id="8g0y6b"
+Login/Register
+   ↓
+Receive JWT
+   ↓
+Store in localStorage
+   ↓
+Attach token via Apollo Link
+   ↓
+Authenticated requests
+```
+
+---
+
+## 🧠 Key Concepts Implemented
+
+* Feature-based folder structure
+* GraphQL query/mutation handling
+* Apollo Client caching
+* Role-based UI rendering
+* Protected routes
+* Form handling with validation
+* Modular component design
+
+---
+
+## 🎯 User Roles
+
+```id="6x2w9n"
+CUSTOMER → Browse, Cart, Orders
+VENDOR  → Manage Products
+ADMIN   → Manage Categories
+```
+
+---
+
+## 🚀 Future Improvements
+
+* Image upload (Cloudinary)
+* Wishlist feature
+* Reviews & ratings
+* Global state optimization
+* Skeleton loaders
+* Dark mode
+
+---
+
+## 👨‍💻 Author
+
+Built as part of a full-stack project demonstrating modern frontend architecture and real-world e-commerce functionality.
+
+---
