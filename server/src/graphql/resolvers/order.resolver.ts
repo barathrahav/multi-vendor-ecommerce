@@ -1,9 +1,12 @@
 import { authorizeRoles } from "../../utils/authorize";
 import {
+    getAllOrdersService,
     getMyOrdersService,
+    getVendorOrdersService,
     getOrderByIdService,
     placeOrderService,
     updateOrderStatusService,
+    updateVendorOrderStatusService,
 } from "../../modules/orders/order.service";
 
 export const orderResolvers = {
@@ -30,6 +33,26 @@ export const orderResolvers = {
                 context.user.id
             );
         },
+
+        vendorOrders: async (
+            _: any,
+            __: any,
+            context: any
+        ) => {
+            authorizeRoles(context.user?.role, ["VENDOR"]);
+
+            return getVendorOrdersService(context.user.id);
+        },
+
+        allOrders: async (
+            _: any,
+            __: any,
+            context: any
+        ) => {
+            authorizeRoles(context.user?.role, ["ADMIN"]);
+
+            return getAllOrdersService();
+        },
     },
 
     Mutation: {
@@ -51,6 +74,20 @@ export const orderResolvers = {
 
             return updateOrderStatusService(
                 args.orderId,
+                args.status
+            );
+        },
+
+        vendorUpdateOrderStatus: async (
+            _: any,
+            args: any,
+            context: any
+        ) => {
+            authorizeRoles(context.user?.role, ["VENDOR"]);
+
+            return updateVendorOrderStatusService(
+                args.orderId,
+                context.user.id,
                 args.status
             );
         },

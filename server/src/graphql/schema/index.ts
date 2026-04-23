@@ -5,6 +5,7 @@ import { productTypeDefs } from "./product.schema";
 import { cartTypeDefs } from "./cart.schema";
 import { orderTypeDefs } from "./order.schema";
 import { paymentTypeDefs } from "./payment.schema";
+import { userTypeDefs } from "./user.schema";
 
 const baseTypeDefs = gql`
   enum Role {
@@ -39,5 +40,6 @@ export const typeDefs = [
   cartTypeDefs,
   orderTypeDefs,
   paymentTypeDefs,
+  userTypeDefs,
 ];
 

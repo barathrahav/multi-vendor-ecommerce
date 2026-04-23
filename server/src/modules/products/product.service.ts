@@ -29,6 +29,7 @@ export const getProductsService = async (
 ) => {
   const {
     search,
+    vendorId,
     categoryId,
     minPrice,
     maxPrice,
@@ -45,6 +46,10 @@ export const getProductsService = async (
       contains: search,
       mode: "insensitive",
     };
+  }
+
+  if (vendorId) {
+    where.vendorId = vendorId;
   }
 
   if (categoryId) {

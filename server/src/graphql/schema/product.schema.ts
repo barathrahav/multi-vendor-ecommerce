@@ -17,6 +17,7 @@ export const productTypeDefs = gql`
   extend type Query {
   products(
     search: String
+    vendorId: ID
     categoryId: ID
     minPrice: Float
     maxPrice: Float

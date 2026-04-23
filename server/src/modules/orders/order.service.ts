@@ -104,6 +104,59 @@ export const getMyOrdersService = async (
   });
 };
 
+export const getAllOrdersService = async () => {
+  return prisma.order.findMany({
+    include: {
+      user: true,
+      items: {
+        include: {
+          product: {
+            include: {
+              vendor: true,
+              category: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+};
+
+export const getVendorOrdersService = async (
+  vendorId: string
+) => {
+  return prisma.order.findMany({
+    where: {
+      items: {
+        some: {
+          product: {
+            vendorId,
+          },
+        },
+      },
+    },
+    include: {
+      user: true,
+      items: {
+        include: {
+          product: {
+            include: {
+              vendor: true,
+              category: true,
+            },
+          },
+        },
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
+};
+
 export const getOrderByIdService = async (
   id: string,
   userId: string
@@ -144,6 +197,49 @@ export const updateOrderStatusService = async (
       items: {
         include: {
           product: true,
+        },
+      },
+    },
+  });
+};
+
+export const updateVendorOrderStatusService = async (
+  orderId: string,
+  vendorId: string,
+  status: string
+) => {
+  const existingOrder = await prisma.order.findFirst({
+    where: {
+      id: orderId,
+      items: {
+        some: {
+          product: {
+            vendorId,
+          },
+        },
+      },
+    },
+  });
+
+  if (!existingOrder) {
+    throw new Error("Order not found for this vendor");
+  }
+
+  return prisma.order.update({
+    where: { id: orderId },
+    data: {
+      status: status as any,
+    },
+    include: {
+      user: true,
+      items: {
+        include: {
+          product: {
+            include: {
+              vendor: true,
+              category: true,
+            },
+          },
         },
       },
     },
