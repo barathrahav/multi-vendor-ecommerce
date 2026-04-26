@@ -1,9 +1,18 @@
-import { useParams } from "react-router-dom";
-import { useQuery } from "@apollo/client/react";
+import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
+import toast from "react-hot-toast";
+import { useNavigate, useParams } from "react-router-dom";
 
+import { ADD_TO_CART } from "../../cart/graphql/cart.mutations";
+import {
+  buildOptimisticCartForAdd,
+  getCartFromCache,
+  syncCartMutation,
+  toOptimisticCartPayload,
+} from "../../cart/utils/cartCache";
 import { GET_PRODUCT } from "../graphql/product.queries";
 import type { ProductDetailsResponse } from "../types/product.types";
-import Loader from "../../../components/common/Loader";
+import ProductDetailsSkeleton from "../components/ProductDetailsSkeleton";
+import { getErrorMessage, reportError } from "../../../lib/errors";
 
 const currencyFormatter = new Intl.NumberFormat("en-IN", {
   style: "currency",
@@ -13,6 +22,8 @@ const currencyFormatter = new Intl.NumberFormat("en-IN", {
 
 const ProductDetailsPage = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const apolloClient = useApolloClient();
 
   const { data, loading, error } = useQuery<ProductDetailsResponse>(
     GET_PRODUCT,
@@ -21,17 +32,64 @@ const ProductDetailsPage = () => {
     }
   );
 
-  if (loading) return <Loader />;
+  const [addToCart, { loading: isAddingToCart }] = useMutation(ADD_TO_CART, {
+    update: syncCartMutation("addToCart"),
+  });
+
+  if (loading) return <ProductDetailsSkeleton />;
 
   if (error) {
     return (
       <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-red-700">
-        We could not load this product right now.
+        {getErrorMessage(error, "We could not load this product right now.")}
       </div>
     );
   }
 
   const product = data?.product;
+
+  const handleAddToCart = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token || !product) {
+      if (!token) {
+        navigate("/login");
+      }
+      return;
+    }
+
+    const toastId = toast.loading("Adding product to cart...");
+
+    try {
+      const currentCart = getCartFromCache(apolloClient.cache);
+      const optimisticCart = buildOptimisticCartForAdd(
+        currentCart,
+        {
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          imageUrl: product.imageUrl ?? null,
+        },
+        1
+      );
+
+      await addToCart({
+        variables: {
+          productId: product.id,
+          quantity: 1,
+        },
+        optimisticResponse: {
+          addToCart: toOptimisticCartPayload(optimisticCart),
+        },
+      });
+
+      toast.success("Added to cart", { id: toastId });
+    } catch (cartError) {
+      toast.error(reportError(cartError, "Could not add to cart"), {
+        id: toastId,
+      });
+    }
+  };
 
   if (!product) {
     return (
@@ -106,8 +164,12 @@ const ProductDetailsPage = () => {
             </div>
 
             <div className="mt-8 space-y-4">
-              <button className="w-full rounded-2xl bg-black px-5 py-4 text-sm font-semibold text-white transition hover:bg-gray-800">
-                Add to Cart
+              <button
+                onClick={() => void handleAddToCart()}
+                disabled={isAddingToCart || product.stock <= 0}
+                className="w-full rounded-2xl bg-black px-5 py-4 text-sm font-semibold text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-300"
+              >
+                {isAddingToCart ? "Adding..." : "Add to Cart"}
               </button>
               <p className="text-sm text-gray-500">
                 Clean product details, upfront pricing, and current stock in one

@@ -3,7 +3,9 @@ import {
   InMemoryCache,
   createHttpLink,
 } from "@apollo/client";
+import { onError } from "@apollo/client/link/error";
 import { setContext } from "@apollo/client/link/context";
+import { getErrorMessage } from "../lib/errors";
 
 const httpLink = createHttpLink({
   uri: "http://localhost:5000/graphql",
@@ -22,7 +24,13 @@ const authLink = setContext((_, { headers }) => {
   };
 });
 
+const errorLink = onError(({ error }) => {
+  if (error) {
+    console.error("Apollo request failed:", getErrorMessage(error), error);
+  }
+});
+
 export const apolloClient = new ApolloClient({
-  link: authLink.concat(httpLink),
+  link: errorLink.concat(authLink.concat(httpLink)),
   cache: new InMemoryCache(),
 });

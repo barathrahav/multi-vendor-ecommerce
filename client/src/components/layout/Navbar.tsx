@@ -5,6 +5,16 @@ import { useAuth } from "../../features/auth/hooks/useAuth";
 import { useQuery } from "@apollo/client/react";
 import { GET_CART } from "../../features/cart/graphql/cart.queries";
 import type { CartResponse } from "../../features/cart/types/cart.types";
+import { getErrorMessage } from "../../lib/errors";
+import {
+  ShoppingCart,
+  Home,
+  LogIn,
+  UserPlus,
+  LogOut,
+  LayoutDashboard,
+  Search,
+} from "lucide-react";
 
 const Navbar = () => {
   const { user, isAuthenticated, loading } = useAuth();
@@ -20,10 +30,13 @@ const Navbar = () => {
     setSearchValue(searchParams.get("q") ?? "");
   }, [searchParams]);
 
-  const { data: cartData } = useQuery<CartResponse>(GET_CART, {
-    skip: !isAuthenticated || !isCustomer,
-    fetchPolicy: "cache-and-network",
-  });
+  const { data: cartData, error: cartError } = useQuery<CartResponse>(
+    GET_CART,
+    {
+      skip: !isAuthenticated || !isCustomer,
+      fetchPolicy: "cache-and-network",
+    },
+  );
 
   const cartCount =
     cartData?.cart?.items.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
@@ -51,130 +64,170 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="grid gap-4 border-b bg-white/90 px-6 py-4 backdrop-blur md:grid-cols-[auto_1fr_auto] md:items-center">
-      <h1 className="text-xl font-bold md:justify-self-start">
-        <Link to="/">E-Commerce</Link>
-      </h1>
+    <nav className="sticky top-0 z-50 border-b bg-white/80 backdrop-blur shadow-sm">
+      <div className="flex items-center justify-between px-6 py-3">
+        {/* Logo */}
+        <Link
+          to="/"
+          className="text-xl font-bold tracking-tight hover:opacity-80"
+        >
+          🛒 E-Commerce
+        </Link>
 
-      <form
-        onSubmit={handleSearchSubmit}
-        className="flex w-full items-center justify-center md:px-8"
-      >
-        <div className="flex w-full max-w-2xl items-center overflow-hidden rounded-full border bg-gray-50 shadow-sm">
-          <input
-            type="search"
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-            placeholder="Search products, categories, or brands"
-            className="w-full bg-transparent px-5 py-3 text-sm outline-none"
-          />
-          <button
-            type="submit"
-            className="rounded-full bg-black px-5 py-3 text-sm font-semibold text-white transition hover:bg-gray-800"
+        {/* Search */}
+        <form
+          onSubmit={handleSearchSubmit}
+          className="hidden md:flex w-full max-w-xl mx-6"
+        >
+          <div className="flex w-full items-center rounded-full border bg-gray-100 px-4 py-2 focus-within:ring-2 focus-within:ring-black">
+            <Search size={18} className="text-gray-500 mr-2" />
+            <input
+              type="search"
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+              placeholder="Search products..."
+              className="w-full bg-transparent outline-none text-sm"
+            />
+          </div>
+        </form>
+
+        {/* Right Section */}
+        <div className="flex items-center gap-4">
+          <Link
+            to="/"
+            className="flex items-center gap-1 text-sm hover:text-black text-gray-600"
           >
-            Search
-          </button>
-        </div>
-      </form>
+            <Home size={18} />
+            Home
+          </Link>
 
-      <div className="flex flex-wrap items-center gap-4 md:justify-self-end">
-        <Link to="/">Home</Link>
-
-        {!loading && isAuthenticated && user?.role === "CUSTOMER" && (
-          <>
-            <Link to="/cart" className="relative inline-flex items-center">
-              Cart
-              {cartCount > 0 && (
-                <span className="ml-2 inline-flex min-w-6 items-center justify-center rounded-full bg-black px-2 py-1 text-xs font-semibold text-white">
-                  {cartCount}
+          {/* CUSTOMER */}
+          {!loading && isAuthenticated && isCustomer && (
+            <>
+              <Link
+                to="/cart"
+                className="relative flex items-center gap-1 text-sm hover:text-black text-gray-600"
+              >
+                <ShoppingCart size={18} />
+                Cart
+                {cartCount > 0 && (
+                  <span className="absolute -top-2 -right-3 bg-black text-white text-xs px-1.5 py-0.5 rounded-full">
+                    {cartCount}
+                  </span>
+                )}
+              </Link>
+              {cartError && (
+                <span className="text-xs text-red-600">
+                  {getErrorMessage(cartError, "Cart unavailable")}
                 </span>
               )}
-            </Link>
-            <Link to="/orders">Orders</Link>
-          </>
-        )}
 
-        {!loading && isAuthenticated && (isVendor || isAdmin) && (
-          <details className="relative">
-            <summary className="cursor-pointer list-none rounded-lg border px-3 py-1 font-medium">
-              Dashboard
-            </summary>
+              <Link
+                to="/orders"
+                className="text-sm hover:text-black text-gray-600"
+              >
+                Orders
+              </Link>
+            </>
+          )}
 
-            <div className="absolute right-0 top-10 z-10 min-w-52 rounded-xl border bg-white p-2 shadow-lg">
-              {isVendor && (
-                <>
-                  <Link
-                    to="/vendor"
-                    className="block rounded-lg px-3 py-2 text-sm hover:bg-gray-50"
-                  >
-                    Vendor Dashboard
-                  </Link>
-                  <Link
-                    to="/vendor/products"
-                    className="block rounded-lg px-3 py-2 text-sm hover:bg-gray-50"
-                  >
-                    My Products
-                  </Link>
-                  <Link
-                    to="/vendor/orders"
-                    className="block rounded-lg px-3 py-2 text-sm hover:bg-gray-50"
-                  >
-                    Vendor Orders
-                  </Link>
-                </>
-              )}
+          {/* DASHBOARD */}
+          {!loading && isAuthenticated && (isVendor || isAdmin) && (
+            <details className="relative">
+              <summary className="flex items-center gap-1 cursor-pointer text-sm text-gray-600 hover:text-black">
+                <LayoutDashboard size={18} />
+                Dashboard
+              </summary>
 
-              {isAdmin && (
-                <>
-                  <Link
-                    to="/admin"
-                    className="block rounded-lg px-3 py-2 text-sm hover:bg-gray-50"
-                  >
-                    Admin Dashboard
-                  </Link>
-                  <Link
-                    to="/admin/users"
-                    className="block rounded-lg px-3 py-2 text-sm hover:bg-gray-50"
-                  >
-                    Manage Users
-                  </Link>
-                  <Link
-                    to="/admin/orders"
-                    className="block rounded-lg px-3 py-2 text-sm hover:bg-gray-50"
-                  >
-                    View Orders
-                  </Link>
-                  <Link
-                    to="/admin/categories"
-                    className="block rounded-lg px-3 py-2 text-sm hover:bg-gray-50"
-                  >
-                    Manage Categories
-                  </Link>
-                </>
-              )}
-            </div>
-          </details>
-        )}
+              <div className="absolute right-0 mt-2 w-56 rounded-xl border bg-white shadow-lg p-2">
+                {isVendor && (
+                  <>
+                    <Link
+                      className="block px-3 py-2 rounded hover:bg-gray-100"
+                      to="/vendor"
+                    >
+                      Vendor Dashboard
+                    </Link>
+                    <Link
+                      className="block px-3 py-2 rounded hover:bg-gray-100"
+                      to="/vendor/products"
+                    >
+                      My Products
+                    </Link>
+                    <Link
+                      className="block px-3 py-2 rounded hover:bg-gray-100"
+                      to="/vendor/orders"
+                    >
+                      Vendor Orders
+                    </Link>
+                  </>
+                )}
 
-        {!isAuthenticated ? (
-          <>
-            <Link to="/login">Login</Link>
-            <Link to="/register">
-              Register
-            </Link>
-          </>
-        ) : (
-          <>
-            <span className="font-medium">{user?.name}</span>
+                {isAdmin && (
+                  <>
+                    <Link
+                      className="block px-3 py-2 rounded hover:bg-gray-100"
+                      to="/admin"
+                    >
+                      Admin Dashboard
+                    </Link>
+                    <Link
+                      className="block px-3 py-2 rounded hover:bg-gray-100"
+                      to="/admin/users"
+                    >
+                      Users
+                    </Link>
+                    <Link
+                      className="block px-3 py-2 rounded hover:bg-gray-100"
+                      to="/admin/orders"
+                    >
+                      Orders
+                    </Link>
+                    <Link
+                      className="block px-3 py-2 rounded hover:bg-gray-100"
+                      to="/admin/categories"
+                    >
+                      Categories
+                    </Link>
+                  </>
+                )}
+              </div>
+            </details>
+          )}
 
-            <button
-              onClick={handleLogout}
-              className="bg-black text-white px-3 py-1 rounded"
-            >
-              Logout
-            </button>
-          </>
-        )}
+          {/* AUTH */}
+          {!isAuthenticated ? (
+            <>
+              <Link
+                to="/login"
+                className="flex items-center gap-1 text-sm hover:text-black text-gray-600"
+              >
+                <LogIn size={18} />
+                Login
+              </Link>
+
+              <Link
+                to="/register"
+                className="flex items-center gap-1 text-sm bg-black text-white px-3 py-1.5 rounded hover:bg-gray-800"
+              >
+                <UserPlus size={18} />
+                Register
+              </Link>
+            </>
+          ) : (
+            <>
+              <span className="text-sm font-medium">{user?.name}</span>
+
+              <button
+                onClick={handleLogout}
+                className="flex items-center gap-1 text-sm bg-black text-white px-3 py-1.5 rounded hover:bg-gray-800"
+              >
+                <LogOut size={18} />
+                Logout
+              </button>
+            </>
+          )}
+        </div>
       </div>
     </nav>
   );

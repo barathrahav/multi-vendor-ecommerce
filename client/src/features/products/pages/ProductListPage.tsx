@@ -3,12 +3,14 @@ import { useQuery } from "@apollo/client/react";
 import { useSearchParams } from "react-router-dom";
 
 import ProductCard from "../components/ProductCard";
+import ProductCardSkeleton from "../components/ProductCardSkeleton";
 import { GET_CATEGORIES, GET_PRODUCTS } from "../graphql/product.queries";
 import type {
   CategoriesResponse,
   ProductsResponse,
   ProductsVariables,
 } from "../types/product.types";
+import { getErrorMessage } from "../../../lib/errors";
 
 const sortOptions = [
   {
@@ -108,7 +110,7 @@ const ProductListPage = () => {
   if (error) {
     return (
       <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-red-700">
-        We could not load products right now.
+        {getErrorMessage(error, "We could not load products right now.")}
       </div>
     );
   }
@@ -250,10 +252,7 @@ const ProductListPage = () => {
       {loading ? (
         <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
           {Array.from({ length: 8 }).map((_, index) => (
-            <div
-              key={index}
-              className="h-[360px] animate-pulse rounded-[1.5rem] border bg-gray-100"
-            />
+            <ProductCardSkeleton key={index} />
           ))}
         </div>
       ) : products.length === 0 ? (

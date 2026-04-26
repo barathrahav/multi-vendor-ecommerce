@@ -136,6 +136,8 @@ Create `.env` file:
 ```env id="p0lg9z"
 VITE_API_URL=http://localhost:5000/graphql
 VITE_RAZORPAY_KEY_ID=your_key_id
+VITE_CLOUDINARY_CLOUD_NAME=your_cloud_name
+VITE_CLOUDINARY_UPLOAD_PRESET=your_unsigned_upload_preset
 ```
 
 ---

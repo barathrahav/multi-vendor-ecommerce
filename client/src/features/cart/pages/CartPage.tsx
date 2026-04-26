@@ -1,11 +1,21 @@
-import { useMutation, useQuery } from "@apollo/client/react";
+import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
-import Loader from "../../../components/common/Loader";
+import CartPageSkeleton from "../components/CartPageSkeleton";
 import { CLEAR_CART, REMOVE_CART, UPDATE_CART } from "../graphql/cart.mutations";
 import { GET_CART } from "../graphql/cart.queries";
 import type { CartItem, CartResponse } from "../types/cart.types";
+import {
+  buildOptimisticCartForClear,
+  buildOptimisticCartForQuantity,
+  buildOptimisticCartForRemove,
+  getCartFromCache,
+  syncCartMutation,
+  toOptimisticCartPayload,
+  writeCartToCache,
+} from "../utils/cartCache";
+import { getErrorMessage, reportError } from "../../../lib/errors";
 
 const currencyFormatter = new Intl.NumberFormat("en-IN", {
   style: "currency",
@@ -14,23 +24,31 @@ const currencyFormatter = new Intl.NumberFormat("en-IN", {
 });
 
 const CartPage = () => {
+  const apolloClient = useApolloClient();
   const { data, loading, error, refetch } = useQuery<CartResponse>(GET_CART, {
     fetchPolicy: "cache-and-network",
   });
 
-  const [updateCart] = useMutation(UPDATE_CART);
-  const [removeCart] = useMutation(REMOVE_CART);
+  const [updateCart] = useMutation(UPDATE_CART, {
+    update: syncCartMutation("updateCartItem"),
+  });
+  const [removeCart] = useMutation(REMOVE_CART, {
+    update: syncCartMutation("removeFromCart"),
+  });
   const [clearCart] = useMutation(CLEAR_CART);
   const navigate = useNavigate();
 
-  if (loading) return <Loader />;
+  if (loading) return <CartPageSkeleton />;
 
   if (error) {
     return (
       <div className="rounded-[2rem] border border-red-200 bg-red-50 p-8 text-center text-red-700">
         <h1 className="text-xl font-semibold">Error loading cart</h1>
         <p className="mt-2 text-sm">
-          We could not load your cart right now. Please try again in a moment.
+          {getErrorMessage(
+            error,
+            "We could not load your cart right now. Please try again in a moment."
+          )}
         </p>
       </div>
     );
@@ -52,14 +70,25 @@ const CartPage = () => {
     const toastId = toast.loading("Updating cart...");
 
     try {
+      const currentCart = getCartFromCache(apolloClient.cache);
+      const optimisticCart = buildOptimisticCartForQuantity(
+        currentCart,
+        productId,
+        quantity
+      );
+
       await updateCart({
         variables: { productId, quantity },
+        optimisticResponse: {
+          updateCartItem: toOptimisticCartPayload(optimisticCart),
+        },
       });
-      await refetch();
       toast.success("Cart updated", { id: toastId });
     } catch (mutationError) {
-      console.error(mutationError);
-      toast.error("Could not update cart", { id: toastId });
+      await refetch();
+      toast.error(reportError(mutationError, "Could not update cart"), {
+        id: toastId,
+      });
     }
   };
 
@@ -67,27 +96,43 @@ const CartPage = () => {
     const toastId = toast.loading("Removing item...");
 
     try {
+      const currentCart = getCartFromCache(apolloClient.cache);
+      const optimisticCart = buildOptimisticCartForRemove(currentCart, productId);
+
       await removeCart({
         variables: { productId },
+        optimisticResponse: {
+          removeFromCart: toOptimisticCartPayload(optimisticCart),
+        },
       });
-      await refetch();
       toast.success("Item removed", { id: toastId });
     } catch (mutationError) {
-      console.error(mutationError);
-      toast.error("Could not remove item", { id: toastId });
+      await refetch();
+      toast.error(reportError(mutationError, "Could not remove item"), {
+        id: toastId,
+      });
     }
   };
 
   const handleClear = async () => {
     const toastId = toast.loading("Clearing cart...");
+    const previousCart = getCartFromCache(apolloClient.cache);
 
     try {
+      writeCartToCache(
+        apolloClient.cache,
+        buildOptimisticCartForClear(previousCart)
+      );
       await clearCart();
-      await refetch();
       toast.success("Cart cleared", { id: toastId });
     } catch (mutationError) {
-      console.error(mutationError);
-      toast.error("Could not clear cart", { id: toastId });
+      if (previousCart) {
+        writeCartToCache(apolloClient.cache, previousCart);
+      }
+      await refetch();
+      toast.error(reportError(mutationError, "Could not clear cart"), {
+        id: toastId,
+      });
     }
   };
 

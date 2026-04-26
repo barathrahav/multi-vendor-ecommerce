@@ -6,6 +6,7 @@ import toast from "react-hot-toast";
 import { useAuth } from "../../auth/hooks/useAuth";
 import { GET_CATEGORIES, GET_PRODUCTS } from "../../products/graphql/product.queries";
 import { CREATE_PRODUCT } from "../../products/graphql/product.mutations";
+import ProductImageField from "../components/ProductImageField";
 import type {
   CategoriesResponse,
   CreateProductResponse,
@@ -13,6 +14,8 @@ import type {
   ProductsResponse,
   ProductsVariables,
 } from "../../products/types/product.types";
+import { uploadImageToCloudinary } from "../../../lib/cloudinary";
+import { reportError } from "../../../lib/errors";
 
 const CreateVendorProductPage = () => {
   const navigate = useNavigate();
@@ -33,6 +36,7 @@ const CreateVendorProductPage = () => {
     stock: "",
     imageUrl: "",
   });
+  const [isUploadingImage, setIsUploadingImage] = useState(false);
 
   const { data, loading: categoriesLoading, error: categoriesError } =
     useQuery<CategoriesResponse>(GET_CATEGORIES);
@@ -93,10 +97,30 @@ const CreateVendorProductPage = () => {
       toast.success("Product created successfully");
       navigate("/vendor/products");
     },
-    onError: () => {
-      toast.error("Could not create product");
+    onError: (mutationError) => {
+      toast.error(reportError(mutationError, "Could not create product"));
     },
   });
+
+  const handleFileUpload = async (file: File) => {
+    const toastId = toast.loading("Uploading image...");
+    setIsUploadingImage(true);
+
+    try {
+      const uploadedImageUrl = await uploadImageToCloudinary(file);
+      setForm((current) => ({
+        ...current,
+        imageUrl: uploadedImageUrl,
+      }));
+      toast.success("Image uploaded", { id: toastId });
+    } catch (uploadError) {
+      toast.error(reportError(uploadError, "Could not upload image"), {
+        id: toastId,
+      });
+    } finally {
+      setIsUploadingImage(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -243,34 +267,33 @@ const CreateVendorProductPage = () => {
           </select>
         </div>
 
-        <div className="space-y-2">
-          <label
-            htmlFor="imageUrl"
-            className="text-sm font-medium text-gray-700"
-          >
-            Image URL
-          </label>
-          <input
-            id="imageUrl"
-            type="url"
-            value={form.imageUrl}
-            onChange={(e) =>
-              setForm({
-                ...form,
-                imageUrl: e.target.value,
-              })
-            }
-            className="w-full rounded-lg border px-4 py-3 outline-none transition focus:border-black"
-            placeholder="https://example.com/product-image.jpg"
-          />
-        </div>
+        <ProductImageField
+          imageUrl={form.imageUrl}
+          isUploading={isUploadingImage}
+          onFileUpload={handleFileUpload}
+          onUrlChange={(value) =>
+            setForm({
+              ...form,
+              imageUrl: value,
+            })
+          }
+        />
 
         <button
           type="submit"
-          disabled={isSubmitting || categoriesLoading || !!categoriesError}
+          disabled={
+            isSubmitting ||
+            isUploadingImage ||
+            categoriesLoading ||
+            !!categoriesError
+          }
           className="w-full rounded-lg bg-black px-4 py-3 text-sm font-semibold text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-300"
         >
-          {isSubmitting ? "Creating Product..." : "Create Product"}
+          {isUploadingImage
+            ? "Uploading image..."
+            : isSubmitting
+              ? "Creating Product..."
+              : "Create Product"}
         </button>
       </form>
     </div>

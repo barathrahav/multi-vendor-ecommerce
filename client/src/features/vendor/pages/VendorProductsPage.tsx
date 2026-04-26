@@ -11,6 +11,8 @@ import type {
   ProductsResponse,
   ProductsVariables,
 } from "../../products/types/product.types";
+import ProductCardSkeleton from "../../products/components/ProductCardSkeleton";
+import { getErrorMessage, reportError } from "../../../lib/errors";
 
 const currencyFormatter = new Intl.NumberFormat("en-IN", {
   style: "currency",
@@ -50,7 +52,7 @@ const VendorProductsPage = () => {
       toast.success("Product deleted successfully");
     },
     onError: (mutationError) => {
-      toast.error(mutationError.message || "Could not delete product");
+      toast.error(reportError(mutationError, "Could not delete product"));
     },
   });
 
@@ -66,13 +68,19 @@ const VendorProductsPage = () => {
   );
 
   if (authLoading || loading) {
-    return <p className="text-sm text-gray-500">Loading your products...</p>;
+    return (
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-2 xl:grid-cols-3">
+        {Array.from({ length: 6 }).map((_, index) => (
+          <ProductCardSkeleton key={index} />
+        ))}
+      </div>
+    );
   }
 
   if (error) {
     return (
       <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
-        We could not load your products right now.
+        {getErrorMessage(error, "We could not load your products right now.")}
       </div>
     );
   }

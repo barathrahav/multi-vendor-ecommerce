@@ -2,7 +2,7 @@ import { useMutation } from "@apollo/client/react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
-import Loader from "../../../components/common/Loader";
+import Skeleton from "../../../components/common/Skeleton";
 import { CREATE_PAYMENT_ORDER, VERIFY_PAYMENT } from "../graphql/payment.mutations";
 import { PLACE_ORDER } from "../graphql/order.mutations";
 import type {
@@ -10,6 +10,7 @@ import type {
   CreatePaymentOrderVariables,
 } from "../types/payment.types";
 import type { PlaceOrderResponse } from "../types/order.types";
+import { reportError } from "../../../lib/errors";
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
@@ -80,8 +81,9 @@ const CheckoutPage = () => {
             toast.success("Payment verified successfully", { id: verifyToastId });
             navigate("/success");
           } catch (verifyError) {
-            console.error(verifyError);
-            toast.error("Payment verification failed", { id: verifyToastId });
+            toast.error(reportError(verifyError, "Payment verification failed"), {
+              id: verifyToastId,
+            });
           }
         },
       };
@@ -89,12 +91,20 @@ const CheckoutPage = () => {
       const rzp = new (window as any).Razorpay(options);
       rzp.open();
     } catch (checkoutError) {
-      console.error(checkoutError);
-      toast.error("Checkout could not be completed", { id: toastId });
+      toast.error(reportError(checkoutError, "Checkout could not be completed"), {
+        id: toastId,
+      });
     }
   };
 
-  if (loading) return <Loader />;
+  if (loading) {
+    return (
+      <div className="mx-auto max-w-4xl space-y-8">
+        <Skeleton className="h-52 w-full rounded-[2rem]" />
+        <Skeleton className="h-80 w-full rounded-[1.5rem]" />
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto max-w-4xl space-y-8">

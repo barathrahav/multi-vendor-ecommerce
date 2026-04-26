@@ -1,9 +1,16 @@
+import { useApolloClient, useMutation } from "@apollo/client/react";
 import { useNavigate } from "react-router-dom";
-import { useMutation } from "@apollo/client/react";
 import toast from "react-hot-toast";
 
 import type { Product } from "../types/product.types";
 import { ADD_TO_CART } from "../../cart/graphql/cart.mutations";
+import {
+  buildOptimisticCartForAdd,
+  getCartFromCache,
+  syncCartMutation,
+  toOptimisticCartPayload,
+} from "../../cart/utils/cartCache";
+import { reportError } from "../../../lib/errors";
 
 const currencyFormatter = new Intl.NumberFormat("en-IN", {
   style: "currency",
@@ -13,8 +20,11 @@ const currencyFormatter = new Intl.NumberFormat("en-IN", {
 
 const ProductCard = ({ product }: { product: Product }) => {
   const navigate = useNavigate();
+  const apolloClient = useApolloClient();
 
-  const [addToCart, { loading }] = useMutation(ADD_TO_CART);
+  const [addToCart, { loading }] = useMutation(ADD_TO_CART, {
+    update: syncCartMutation("addToCart"),
+  });
 
   const handleAddToCart = async () => {
     const token = localStorage.getItem("token");
@@ -27,17 +37,31 @@ const ProductCard = ({ product }: { product: Product }) => {
     const toastId = toast.loading("Adding product to cart...");
 
     try {
+      const currentCart = getCartFromCache(apolloClient.cache);
+      const optimisticCart = buildOptimisticCartForAdd(
+        currentCart,
+        {
+          id: product.id,
+          name: product.name,
+          price: product.price,
+          imageUrl: product.imageUrl ?? null,
+        },
+        1
+      );
+
       await addToCart({
         variables: {
           productId: product.id,
           quantity: 1,
         },
+        optimisticResponse: {
+          addToCart: toOptimisticCartPayload(optimisticCart),
+        },
       });
 
       toast.success("Added to cart", { id: toastId });
     } catch (err) {
-      console.error(err);
-      toast.error("Something went wrong", { id: toastId });
+      toast.error(reportError(err, "Could not add to cart"), { id: toastId });
     }
   };
 

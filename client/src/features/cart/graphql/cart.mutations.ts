@@ -11,10 +11,13 @@ export const ADD_TO_CART = gql`
     ) {
       id
       items {
+        id
         quantity
         product {
           id
           name
+          price
+          imageUrl
         }
       }
     }
@@ -31,6 +34,16 @@ export const UPDATE_CART = gql`
       quantity: $quantity
     ) {
       id
+      items {
+        id
+        quantity
+        product {
+          id
+          name
+          price
+          imageUrl
+        }
+      }
     }
   }
 `;
@@ -39,6 +52,16 @@ export const REMOVE_CART = gql`
   mutation RemoveFromCart($productId: ID!) {
     removeFromCart(productId: $productId) {
       id
+      items {
+        id
+        quantity
+        product {
+          id
+          name
+          price
+          imageUrl
+        }
+      }
     }
   }
 `;

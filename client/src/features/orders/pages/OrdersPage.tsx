@@ -14,18 +14,42 @@ const dateFormatter = new Intl.DateTimeFormat("en-IN", {
   timeStyle: "short",
 });
 
+// ✅ FIXED DATE HANDLER
 const formatOrderDate = (createdAt?: string) => {
-  if (!createdAt) {
-    return "Unknown date";
+  if (!createdAt) return "Unknown date";
+
+  let parsedDate = new Date(createdAt);
+
+  // Handle non-ISO format like "2026-04-14 10:20:30"
+  if (isNaN(parsedDate.getTime()) && createdAt.includes(" ")) {
+    parsedDate = new Date(createdAt.replace(" ", "T"));
   }
 
-  const parsedDate = new Date(createdAt);
-
-  if (Number.isNaN(parsedDate.getTime())) {
+  // Still invalid → fallback safely
+  if (isNaN(parsedDate.getTime())) {
+    console.warn("Invalid date received:", createdAt);
     return "Unknown date";
   }
 
   return dateFormatter.format(parsedDate);
+};
+
+// ✅ STATUS COLOR HELPER
+const getStatusStyle = (status: string) => {
+  switch (status) {
+    case "PAID":
+      return "bg-green-100 text-green-700";
+    case "PENDING_PAYMENT":
+      return "bg-yellow-100 text-yellow-700";
+    case "SHIPPED":
+      return "bg-blue-100 text-blue-700";
+    case "DELIVERED":
+      return "bg-purple-100 text-purple-700";
+    case "CANCELLED":
+      return "bg-red-100 text-red-700";
+    default:
+      return "bg-gray-100 text-gray-700";
+  }
 };
 
 const OrdersPage = () => {
@@ -52,6 +76,7 @@ const OrdersPage = () => {
 
   return (
     <div className="space-y-8">
+      {/* HEADER */}
       <section className="rounded-[2rem] border bg-[linear-gradient(135deg,#eff6ff,#ffffff_45%,#ecfeff)] p-8 shadow-sm">
         <p className="text-sm font-medium uppercase tracking-[0.2em] text-gray-500">
           Order History
@@ -64,6 +89,7 @@ const OrdersPage = () => {
         </p>
       </section>
 
+      {/* EMPTY STATE */}
       {orders.length === 0 ? (
         <div className="rounded-[2rem] border border-dashed bg-white p-12 text-center shadow-sm">
           <h2 className="text-2xl font-bold text-gray-900">No orders yet</h2>
@@ -74,22 +100,33 @@ const OrdersPage = () => {
       ) : (
         <div className="space-y-5">
           {orders.map((order) => (
-            <article key={order.id} className="rounded-[1.5rem] border bg-white p-6 shadow-sm">
+            <article
+              key={order.id}
+              className="rounded-[1.5rem] border bg-white p-6 shadow-sm"
+            >
               <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                 <div className="space-y-2">
                   <div className="flex flex-wrap items-center gap-3">
                     <h2 className="text-lg font-semibold text-gray-900">
                       Order #{order.id.slice(0, 8)}
                     </h2>
-                    <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700">
+
+                    {/* ✅ STATUS BADGE */}
+                    <span
+                      className={`rounded-full px-3 py-1 text-xs font-semibold ${getStatusStyle(
+                        order.status
+                      )}`}
+                    >
                       {order.status}
                     </span>
                   </div>
+
                   <p className="text-sm text-gray-500">
                     Placed on {formatOrderDate(order.createdAt)}
                   </p>
                 </div>
 
+                {/* TOTAL */}
                 <div className="rounded-2xl bg-gray-50 p-4">
                   <p className="text-sm text-gray-500">Total</p>
                   <p className="mt-1 text-xl font-bold text-gray-900">
@@ -98,6 +135,7 @@ const OrdersPage = () => {
                 </div>
               </div>
 
+              {/* ITEMS */}
               <div className="mt-5 grid gap-3">
                 {order.items.map((item) => (
                   <div
@@ -105,11 +143,18 @@ const OrdersPage = () => {
                     className="flex items-center justify-between rounded-xl border bg-gray-50 px-4 py-3"
                   >
                     <div>
-                      <p className="font-medium text-gray-900">{item.name}</p>
-                      <p className="text-sm text-gray-500">Qty: {item.quantity}</p>
+                      <p className="font-medium text-gray-900">
+                        {item.name}
+                      </p>
+                      <p className="text-sm text-gray-500">
+                        Qty: {item.quantity}
+                      </p>
                     </div>
+
                     <p className="font-semibold text-gray-900">
-                      {currencyFormatter.format(item.price * item.quantity)}
+                      {currencyFormatter.format(
+                        item.price * item.quantity
+                      )}
                     </p>
                   </div>
                 ))}
