@@ -1,9 +1,15 @@
 import { useApolloClient, useMutation } from "@apollo/client/react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
+import { Heart } from "lucide-react";
 
 import type { Product } from "../types/product.types";
 import { ADD_TO_CART } from "../../cart/graphql/cart.mutations";
+import {
+  ADD_TO_WISHLIST,
+  REMOVE_FROM_WISHLIST,
+} from "../../wishlist/graphql/wishlist.mutations";
+import { GET_MY_WISHLIST } from "../../wishlist/graphql/wishlist.queries";
 import {
   buildOptimisticCartForAdd,
   getCartFromCache,
@@ -18,13 +24,32 @@ const currencyFormatter = new Intl.NumberFormat("en-IN", {
   maximumFractionDigits: 0,
 });
 
-const ProductCard = ({ product }: { product: Product }) => {
+const ProductCard = ({
+  product,
+  wishedProductIds = [],
+}: {
+  product: Product;
+  wishedProductIds?: string[];
+}) => {
   const navigate = useNavigate();
   const apolloClient = useApolloClient();
+  const isWished = wishedProductIds.includes(product.id);
 
   const [addToCart, { loading }] = useMutation(ADD_TO_CART, {
     update: syncCartMutation("addToCart"),
   });
+  const [addToWishlist, { loading: isAddingWishlist }] = useMutation(
+    ADD_TO_WISHLIST,
+    {
+      refetchQueries: [{ query: GET_MY_WISHLIST }],
+    }
+  );
+  const [removeFromWishlist, { loading: isRemovingWishlist }] = useMutation(
+    REMOVE_FROM_WISHLIST,
+    {
+      refetchQueries: [{ query: GET_MY_WISHLIST }],
+    }
+  );
 
   const handleAddToCart = async () => {
     const token = localStorage.getItem("token");
@@ -65,12 +90,53 @@ const ProductCard = ({ product }: { product: Product }) => {
     }
   };
 
+  const handleWishlistToggle = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      navigate("/login");
+      return;
+    }
+
+    try {
+      if (isWished) {
+        await removeFromWishlist({
+          variables: { productId: product.id },
+        });
+        toast.success("Removed from wishlist");
+        return;
+      }
+
+      await addToWishlist({
+        variables: { productId: product.id },
+      });
+      toast.success("Added to wishlist");
+    } catch (err) {
+      toast.error(reportError(err, "Could not update wishlist"));
+    }
+  };
+
   return (
     <article
       onClick={() => navigate(`/product/${product.id}`)}
       className="group cursor-pointer overflow-hidden rounded-[1.5rem] border bg-white shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-xl"
     >
       <div className="relative overflow-hidden bg-gray-100">
+        <button
+          type="button"
+          aria-label={isWished ? "Remove from wishlist" : "Add to wishlist"}
+          disabled={isAddingWishlist || isRemovingWishlist}
+          onClick={(e) => {
+            e.stopPropagation();
+            void handleWishlistToggle();
+          }}
+          className="absolute right-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-gray-700 shadow-sm transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          <Heart
+            size={19}
+            className={isWished ? "fill-red-500 text-red-500" : ""}
+          />
+        </button>
         <img
           src={product.imageUrl || "https://via.placeholder.com/600x500?text=Product"}
           alt={product.name}

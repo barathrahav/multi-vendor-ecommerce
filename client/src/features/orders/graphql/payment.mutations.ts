@@ -25,3 +25,9 @@ export const VERIFY_PAYMENT = gql`
     )
   }
 `;
+
+export const MARK_PAYMENT_FAILED = gql`
+  mutation MarkPaymentFailed($orderId: ID!, $reason: String) {
+    markPaymentFailed(orderId: $orderId, reason: $reason)
+  }
+`;

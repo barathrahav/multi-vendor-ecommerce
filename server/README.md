@@ -66,6 +66,8 @@ Backend API for a full-stack multi-vendor e-commerce platform built with modern 
 * Razorpay payment gateway
 * Create payment order
 * Secure payment verification (HMAC SHA256)
+* Paid order refund flow on cancellation
+* Email and SMS notifications for auth, order, payment, status, and refund events
 
 ---
 
@@ -133,9 +135,31 @@ Create `.env` file:
 DATABASE_URL=postgresql://USER:PASSWORD@localhost:5432/DB_NAME
 
 JWT_SECRET=your_jwt_secret
+JWT_REFRESH_SECRET=your_refresh_secret
+JWT_ACCESS_EXPIRES_IN=15m
+JWT_REFRESH_EXPIRES_IN=30d
 
 RAZORPAY_KEY_ID=your_key_id
 RAZORPAY_KEY_SECRET=your_key_secret
+
+APP_NAME=E-Commerce
+CLIENT_URL=http://localhost:5173
+CORS_ORIGINS=http://localhost:5173
+LOG_LEVEL=info
+SENTRY_DSN=
+SENTRY_TRACES_SAMPLE_RATE=0.1
+REDIS_URL=redis://localhost:6379
+
+# Optional. Without these, emails are logged in the server console.
+# Gmail requires a Google App Password, not your normal Gmail password.
+GMAIL_USER=yourgmail@gmail.com
+GMAIL_APP_PASSWORD=your_16_character_app_password
+NOTIFICATION_FROM_EMAIL="E-Commerce <yourgmail@gmail.com>"
+
+# Optional. Without these, SMS messages are logged in the server console.
+TWILIO_ACCOUNT_SID=your_twilio_sid
+TWILIO_AUTH_TOKEN=your_twilio_token
+TWILIO_FROM_PHONE=+10000000000
 ```
 
 ---
@@ -233,8 +257,6 @@ query {
 ## 🚀 Future Improvements
 
 * Image upload (Cloudinary / S3)
-* Email/SMS notifications
-* Refund handling
 * Inventory alerts
 * Microservices architecture
 

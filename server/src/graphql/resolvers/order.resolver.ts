@@ -5,6 +5,7 @@ import {
     getVendorOrdersService,
     getOrderByIdService,
     placeOrderService,
+    cancelOrderService,
     updateOrderStatusService,
     updateVendorOrderStatusService,
 } from "../../modules/orders/order.service";
@@ -64,6 +65,18 @@ export const orderResolvers = {
             authorizeRoles(context.user?.role, ["CUSTOMER"]);
 
             return placeOrderService(context.user.id);
+        },
+        cancelOrder: async (
+            _: any,
+            args: any,
+            context: any
+        ) => {
+            authorizeRoles(context.user?.role, ["CUSTOMER"]);
+
+            return cancelOrderService(
+                args.orderId,
+                context.user.id
+            );
         },
         updateOrderStatus: async (
             _: any,

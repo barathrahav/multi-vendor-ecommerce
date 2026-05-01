@@ -4,6 +4,7 @@ export interface AdminUser {
   id: string;
   name: string;
   email: string;
+  phone?: string | null;
   role: AdminUserRole;
 }
 
@@ -33,6 +34,7 @@ export interface AdminCreateUserVariables {
   name: string;
   email: string;
   password: string;
+  phone?: string;
   role: AdminUserRole;
 }
 
@@ -40,6 +42,7 @@ export interface AdminUpdateUserVariables {
   id: string;
   name: string;
   email: string;
+  phone?: string;
   role: AdminUserRole;
 }
 

@@ -34,6 +34,10 @@ export const writeCartToCache = (
   });
 };
 
+export const clearCartCache = (cache: ApolloCache) => {
+  writeCartToCache(cache, emptyCart());
+};
+
 export const buildCartItem = (
   product: ProductLike,
   quantity: number,

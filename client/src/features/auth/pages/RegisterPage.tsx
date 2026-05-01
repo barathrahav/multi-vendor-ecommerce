@@ -6,6 +6,7 @@ import Navbar from "../../../components/layout/Navbar";
 import { ME_QUERY } from "../graphql/auth.queries";
 import { REGISTER_MUTATION } from "../graphql/auth.mutations";
 import type { RegisterResponse, RegisterVariables } from "../types/auth.types";
+import { countryCodes, normalizePhone } from "../utils/phone";
 import { Eye, EyeOff } from "lucide-react";
 
 const RegisterPage = () => {
@@ -15,6 +16,8 @@ const RegisterPage = () => {
   const [form, setForm] = useState({
     name: "",
     email: "",
+    countryCode: "+91",
+    phoneNumber: "",
     password: "",
     confirmPassword: "",
   });
@@ -25,6 +28,7 @@ const RegisterPage = () => {
   >(REGISTER_MUTATION, {
     onCompleted: async (data) => {
       localStorage.setItem("token", data.register.token);
+      localStorage.setItem("refreshToken", data.register.refreshToken);
 
       await apolloClient.clearStore();
       apolloClient.writeQuery({
@@ -47,11 +51,14 @@ const RegisterPage = () => {
       return;
     }
 
+    const phone = normalizePhone(form.countryCode, form.phoneNumber);
+
     try {
       await register({
         variables: {
           name: form.name,
           email: form.email,
+          phone,
           password: form.password,
           role: "CUSTOMER",
         },
@@ -143,6 +150,48 @@ const RegisterPage = () => {
                 </div>
 
                 <div className="space-y-2">
+                  <label
+                    className="text-sm font-medium text-gray-700"
+                    htmlFor="phone"
+                  >
+                    Phone for SMS alerts
+                  </label>
+                  <div className="grid grid-cols-[8.5rem_1fr] gap-3">
+                    <select
+                      aria-label="Country code"
+                      value={form.countryCode}
+                      className="rounded-2xl border bg-gray-50 px-3 py-3 text-sm outline-none transition focus:border-black focus:bg-white"
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          countryCode: e.target.value,
+                        })
+                      }
+                    >
+                      {countryCodes.map((country) => (
+                        <option key={country.code} value={country.code}>
+                          {country.code} {country.label}
+                        </option>
+                      ))}
+                    </select>
+                    <input
+                      id="phone"
+                      type="tel"
+                      inputMode="numeric"
+                      placeholder="9876543210"
+                      value={form.phoneNumber}
+                      className="min-w-0 rounded-2xl border bg-gray-50 px-4 py-3 outline-none transition focus:border-black focus:bg-white"
+                      onChange={(e) =>
+                        setForm({
+                          ...form,
+                          phoneNumber: e.target.value.replace(/[^\d\s-]/g, ""),
+                        })
+                      }
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700">
                     Password
                   </label>
@@ -221,7 +270,11 @@ const RegisterPage = () => {
                       onClick={() => setShowConfirmPassword((prev) => !prev)}
                       className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500"
                     >
-                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                      {showConfirmPassword ? (
+                        <EyeOff size={20} />
+                      ) : (
+                        <Eye size={20} />
+                      )}
                     </button>
                   </div>
 

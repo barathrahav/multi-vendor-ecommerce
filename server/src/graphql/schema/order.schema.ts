@@ -16,6 +16,13 @@ export const orderTypeDefs = gql`
     items: [OrderItem!]!
     createdAt: String!
     user: User!
+    statusHistory: [OrderStatusHistory!]!
+  }
+
+  type OrderStatusHistory {
+    id: ID!
+    status: String!
+    createdAt: String!
   }
 
   extend type Query {
@@ -27,6 +34,7 @@ export const orderTypeDefs = gql`
 
   extend type Mutation {
     placeOrder: Order!
+    cancelOrder(orderId: ID!): Order!
     vendorUpdateOrderStatus(
       orderId: ID!
       status: String!
@@ -38,5 +46,5 @@ export const orderTypeDefs = gql`
     orderId: ID!
     status: String!
   ): Order!
-}
+  }
 `;

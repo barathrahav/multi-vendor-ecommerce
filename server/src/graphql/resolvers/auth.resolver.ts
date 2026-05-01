@@ -1,6 +1,9 @@
 import {
   loginUser,
+  refreshTokenService,
   registerUser,
+  requestOtpService,
+  verifyOtpLoginService,
 } from "../../modules/auth/auth.service";
 
 export const authResolvers = {
@@ -10,6 +13,7 @@ export const authResolvers = {
         args.name,
         args.email,
         args.password,
+        args.phone,
         args.role
       );
     },
@@ -19,6 +23,18 @@ export const authResolvers = {
         args.email,
         args.password
       );
+    },
+
+    requestOtp: async (_: any, args: any) => {
+      return requestOtpService(args.phone);
+    },
+
+    verifyOtpLogin: async (_: any, args: any) => {
+      return verifyOtpLoginService(args.phone, args.code);
+    },
+
+    refreshToken: async (_: any, args: any) => {
+      return refreshTokenService(args.refreshToken);
     },
   },
 };

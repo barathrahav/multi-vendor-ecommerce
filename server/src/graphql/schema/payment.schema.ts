@@ -18,5 +18,10 @@ export const paymentTypeDefs = gql`
       razorpayPaymentId: String!
       razorpaySignature: String!
     ): String!
+
+    markPaymentFailed(
+      orderId: ID!
+      reason: String
+    ): String!
   }
 `;

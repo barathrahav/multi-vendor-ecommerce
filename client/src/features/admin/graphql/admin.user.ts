@@ -6,6 +6,7 @@ export const GET_USERS = gql`
       id
       name
       email
+      phone
       role
     }
   }
@@ -16,17 +17,20 @@ export const ADMIN_CREATE_USER = gql`
     $name: String!
     $email: String!
     $password: String!
+    $phone: String
     $role: Role!
   ) {
     adminCreateUser(
       name: $name
       email: $email
       password: $password
+      phone: $phone
       role: $role
     ) {
       id
       name
       email
+      phone
       role
     }
   }
@@ -37,12 +41,14 @@ export const ADMIN_UPDATE_USER = gql`
     $id: ID!
     $name: String
     $email: String
+    $phone: String
     $role: Role
   ) {
-    adminUpdateUser(id: $id, name: $name, email: $email, role: $role) {
+    adminUpdateUser(id: $id, name: $name, email: $email, phone: $phone, role: $role) {
       id
       name
       email
+      phone
       role
     }
   }

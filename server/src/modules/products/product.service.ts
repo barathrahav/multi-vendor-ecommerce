@@ -1,4 +1,5 @@
 import { prisma } from "../../config/prisma";
+import { cache } from "../../config/cache";
 
 export const createProductService = async (
   data: any,
@@ -27,6 +28,13 @@ export const createProductService = async (
 export const getProductsService = async (
   filters: any
 ) => {
+  const cacheKey = `products:${JSON.stringify(filters)}`;
+  const cached = await cache.get<any>(cacheKey);
+
+  if (cached) {
+    return cached;
+  }
+
   const {
     search,
     vendorId,
@@ -82,12 +90,16 @@ export const getProductsService = async (
     prisma.product.count({ where }),
   ]);
 
-  return {
+  const response = {
     items,
     total,
     page,
     totalPages: Math.ceil(total / limit),
   };
+
+  await cache.set(cacheKey, response, 60);
+
+  return response;
 };
 
 export const getProductByIdService = async (id: string) => {

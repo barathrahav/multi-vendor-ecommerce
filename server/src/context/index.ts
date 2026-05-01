@@ -12,5 +12,9 @@ export const createContext = async ({
 
   const user = await getUserFromToken(token);
 
-  return { req, user };
+  return {
+    req,
+    user,
+    idempotencyKey: req.headers["idempotency-key"] as string | undefined,
+  };
 };

@@ -13,6 +13,7 @@ export const createUserService = async (
   name: string,
   email: string,
   password: string,
+  phone: string | undefined,
   role: "ADMIN" | "VENDOR" | "CUSTOMER"
 ) => {
   const existingUser = await prisma.user.findUnique({
@@ -29,6 +30,7 @@ export const createUserService = async (
     data: {
       name,
       email,
+      phone: phone || null,
       password: hashedPassword,
       role,
     },
@@ -40,6 +42,7 @@ export const updateUserService = async (
   data: {
     name?: string;
     email?: string;
+    phone?: string;
     role?: "ADMIN" | "VENDOR" | "CUSTOMER";
   }
 ) => {
@@ -64,6 +67,42 @@ export const updateUserService = async (
   return prisma.user.update({
     where: { id },
     data,
+  });
+};
+
+export const updateProfileService = async (
+  id: string,
+  data: {
+    name: string;
+    email: string;
+    phone?: string | null;
+  }
+) => {
+  const existingUser = await prisma.user.findUnique({
+    where: { id },
+  });
+
+  if (!existingUser) {
+    throw new Error("User not found");
+  }
+
+  if (data.email !== existingUser.email) {
+    const emailOwner = await prisma.user.findUnique({
+      where: { email: data.email },
+    });
+
+    if (emailOwner) {
+      throw new Error("Email already in use");
+    }
+  }
+
+  return prisma.user.update({
+    where: { id },
+    data: {
+      name: data.name,
+      email: data.email,
+      phone: data.phone || null,
+    },
   });
 };
 

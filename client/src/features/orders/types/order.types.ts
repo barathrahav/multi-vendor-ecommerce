@@ -31,6 +31,7 @@ export interface Order {
     name: string;
     email: string;
   } | null;
+  statusHistory: OrderStatusHistory[];
 }
 
 export interface OrdersResponse {
@@ -39,4 +40,10 @@ export interface OrdersResponse {
 
 export interface VendorOrdersResponse {
   vendorOrders: Order[];
+}
+
+export interface OrderStatusHistory {
+  id: string;
+  status: string;
+  createdAt: string;
 }

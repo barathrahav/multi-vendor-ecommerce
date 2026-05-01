@@ -13,6 +13,11 @@ export const GET_MY_ORDERS = gql`
         price
         quantity
       }
+      statusHistory {
+        id
+        status
+        createdAt
+      }
     }
   }
 `;
@@ -40,6 +45,11 @@ export const GET_VENDOR_ORDERS = gql`
             id
           }
         }
+      }
+      statusHistory {
+        id
+        status
+        createdAt
       }
     }
   }

@@ -6,6 +6,9 @@ import { cartTypeDefs } from "./cart.schema";
 import { orderTypeDefs } from "./order.schema";
 import { paymentTypeDefs } from "./payment.schema";
 import { userTypeDefs } from "./user.schema";
+import { notificationTypeDefs } from "./notification.schema";
+import { wishlistTypeDefs } from "./wishlist.schema";
+import { analyticsTypeDefs } from "./analytics.schema";
 
 const baseTypeDefs = gql`
   enum Role {
@@ -18,6 +21,7 @@ const baseTypeDefs = gql`
     id: ID!
     name: String!
     email: String!
+    phone: String
     role: Role!
   }
 
@@ -41,5 +45,8 @@ export const typeDefs = [
   orderTypeDefs,
   paymentTypeDefs,
   userTypeDefs,
+  notificationTypeDefs,
+  wishlistTypeDefs,
+  analyticsTypeDefs,
 ];
 

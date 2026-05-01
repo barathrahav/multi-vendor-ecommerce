@@ -22,6 +22,7 @@ import type {
   AdminUserRole,
   UsersResponse,
 } from "../types/admin.user.types";
+import { countryCodes, normalizePhone, splitPhone } from "../../auth/utils/phone";
 
 const roleOptions: AdminUserRole[] = ["ADMIN", "VENDOR", "CUSTOMER"];
 
@@ -29,6 +30,8 @@ const AdminUsersPage = () => {
   const [createForm, setCreateForm] = useState({
     name: "",
     email: "",
+    countryCode: "+91",
+    phoneNumber: "",
     password: "",
     role: "CUSTOMER" as AdminUserRole,
   });
@@ -36,6 +39,8 @@ const AdminUsersPage = () => {
   const [editingForm, setEditingForm] = useState({
     name: "",
     email: "",
+    countryCode: "+91",
+    phoneNumber: "",
     role: "CUSTOMER" as AdminUserRole,
   });
   const [passwordDrafts, setPasswordDrafts] = useState<Record<string, string>>({});
@@ -54,6 +59,8 @@ const AdminUsersPage = () => {
       setCreateForm({
         name: "",
         email: "",
+        countryCode: "+91",
+        phoneNumber: "",
         password: "",
         role: "CUSTOMER",
       });
@@ -75,6 +82,8 @@ const AdminUsersPage = () => {
       setEditingForm({
         name: "",
         email: "",
+        countryCode: "+91",
+        phoneNumber: "",
         role: "CUSTOMER",
       });
       toast.success("User updated");
@@ -129,6 +138,7 @@ const AdminUsersPage = () => {
       variables: {
         name,
         email,
+        phone: normalizePhone(createForm.countryCode, createForm.phoneNumber),
         password,
         role: createForm.role,
       },
@@ -136,10 +146,14 @@ const AdminUsersPage = () => {
   };
 
   const startEditing = (user: AdminUser) => {
+    const phone = splitPhone(user.phone);
+
     setEditingUserId(user.id);
     setEditingForm({
       name: user.name,
       email: user.email,
+      countryCode: phone.countryCode,
+      phoneNumber: phone.phoneNumber,
       role: user.role,
     });
   };
@@ -158,6 +172,7 @@ const AdminUsersPage = () => {
         id,
         name,
         email,
+        phone: normalizePhone(editingForm.countryCode, editingForm.phoneNumber),
         role: editingForm.role,
       },
     });
@@ -255,6 +270,38 @@ const AdminUsersPage = () => {
             placeholder="Password"
             className="rounded-lg border px-4 py-3 outline-none transition focus:border-black"
           />
+          <div className="grid grid-cols-[8rem_1fr] gap-3">
+            <select
+              aria-label="Country code"
+              value={createForm.countryCode}
+              onChange={(e) =>
+                setCreateForm((current) => ({
+                  ...current,
+                  countryCode: e.target.value,
+                }))
+              }
+              className="rounded-lg border bg-white px-3 py-3 text-sm outline-none transition focus:border-black"
+            >
+              {countryCodes.map((country) => (
+                <option key={country.code} value={country.code}>
+                  {country.code} {country.label}
+                </option>
+              ))}
+            </select>
+            <input
+              type="tel"
+              inputMode="numeric"
+              value={createForm.phoneNumber}
+              onChange={(e) =>
+                setCreateForm((current) => ({
+                  ...current,
+                  phoneNumber: e.target.value.replace(/[^\d\s-]/g, ""),
+                }))
+              }
+              placeholder="Phone"
+              className="min-w-0 rounded-lg border px-4 py-3 outline-none transition focus:border-black"
+            />
+          </div>
           <select
             value={createForm.role}
             onChange={(e) =>
@@ -301,7 +348,7 @@ const AdminUsersPage = () => {
 
               return (
                 <div key={user.id} className="rounded-xl border p-4">
-                  <div className="grid gap-4 lg:grid-cols-[2fr_2fr_1fr_auto]">
+                  <div className="grid gap-4 lg:grid-cols-[1.4fr_1.6fr_1.8fr_1fr_auto]">
                     {isEditing ? (
                       <>
                         <input
@@ -326,6 +373,37 @@ const AdminUsersPage = () => {
                           }
                           className="rounded-lg border px-4 py-2 outline-none transition focus:border-black"
                         />
+                        <div className="grid grid-cols-[7rem_1fr] gap-2">
+                          <select
+                            aria-label="Country code"
+                            value={editingForm.countryCode}
+                            onChange={(e) =>
+                              setEditingForm((current) => ({
+                                ...current,
+                                countryCode: e.target.value,
+                              }))
+                            }
+                            className="rounded-lg border bg-white px-3 py-2 text-sm outline-none transition focus:border-black"
+                          >
+                            {countryCodes.map((country) => (
+                              <option key={country.code} value={country.code}>
+                                {country.code}
+                              </option>
+                            ))}
+                          </select>
+                          <input
+                            type="tel"
+                            inputMode="numeric"
+                            value={editingForm.phoneNumber}
+                            onChange={(e) =>
+                              setEditingForm((current) => ({
+                                ...current,
+                                phoneNumber: e.target.value.replace(/[^\d\s-]/g, ""),
+                              }))
+                            }
+                            className="min-w-0 rounded-lg border px-4 py-2 outline-none transition focus:border-black"
+                          />
+                        </div>
                         <select
                           value={editingForm.role}
                           onChange={(e) =>
@@ -358,6 +436,8 @@ const AdminUsersPage = () => {
                               setEditingForm({
                                 name: "",
                                 email: "",
+                                countryCode: "+91",
+                                phoneNumber: "",
                                 role: "CUSTOMER",
                               });
                             }}
@@ -375,6 +455,9 @@ const AdminUsersPage = () => {
                           <p className="text-sm text-gray-500">{user.id}</p>
                         </div>
                         <p className="text-sm text-gray-700">{user.email}</p>
+                        <p className="text-sm text-gray-700">
+                          {user.phone || "No phone"}
+                        </p>
                         <span className="inline-flex h-fit rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700">
                           {user.role}
                         </span>

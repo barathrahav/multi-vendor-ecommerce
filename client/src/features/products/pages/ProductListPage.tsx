@@ -5,6 +5,7 @@ import { useSearchParams } from "react-router-dom";
 import ProductCard from "../components/ProductCard";
 import ProductCardSkeleton from "../components/ProductCardSkeleton";
 import { GET_CATEGORIES, GET_PRODUCTS } from "../graphql/product.queries";
+import { GET_MY_WISHLIST } from "../../wishlist/graphql/wishlist.queries";
 import type {
   CategoriesResponse,
   ProductsResponse,
@@ -72,8 +73,16 @@ const ProductListPage = () => {
   });
 
   const { data: categoriesData } = useQuery<CategoriesResponse>(GET_CATEGORIES);
+  const { data: wishlistData } = useQuery<{
+    myWishlist: Array<{ product: { id: string } }>;
+  }>(GET_MY_WISHLIST, {
+    skip: !localStorage.getItem("token"),
+    fetchPolicy: "cache-and-network",
+  });
 
   const products = data?.products.items ?? [];
+  const wishedProductIds =
+    wishlistData?.myWishlist.map((item) => item.product.id) ?? [];
   const totalProducts = data?.products.total ?? 0;
   const totalPages = data?.products.totalPages ?? 1;
 
@@ -266,7 +275,11 @@ const ProductListPage = () => {
         <>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-4">
             {products.map((product) => (
-              <ProductCard key={product.id} product={product} />
+              <ProductCard
+                key={product.id}
+                product={product}
+                wishedProductIds={wishedProductIds}
+              />
             ))}
           </div>
 

@@ -9,6 +9,50 @@ body {
   color: #111827;
 }
 
+.dark body {
+  background:
+    radial-gradient(circle at top, rgba(59, 130, 246, 0.14), transparent 28%),
+    linear-gradient(180deg, #020617 0%, #0f172a 42%, #111827 100%);
+  color: #e5e7eb;
+}
+
+.dark .bg-white,
+.dark .bg-white\/80,
+.dark .bg-gray-50,
+.dark .bg-gray-100 {
+  background-color: #111827 !important;
+}
+
+.dark .text-gray-900,
+.dark .text-gray-800,
+.dark .text-gray-700 {
+  color: #f8fafc !important;
+}
+
+.dark .text-gray-600,
+.dark .text-gray-500 {
+  color: #cbd5e1 !important;
+}
+
+.dark .border,
+.dark .border-b,
+.dark .border-r,
+.dark .border-gray-200 {
+  border-color: #334155 !important;
+}
+
+.dark input,
+.dark select,
+.dark textarea {
+  background-color: #0f172a !important;
+  color: #f8fafc !important;
+  border-color: #334155 !important;
+}
+
+.dark nav {
+  background-color: rgba(15, 23, 42, 0.86) !important;
+}
+
 #root {
   min-height: 100vh;
 }

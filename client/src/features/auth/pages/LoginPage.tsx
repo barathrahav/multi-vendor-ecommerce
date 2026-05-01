@@ -3,10 +3,15 @@ import { useNavigate, Link } from "react-router-dom";
 import { useApolloClient, useMutation } from "@apollo/client/react";
 
 import Navbar from "../../../components/layout/Navbar";
-import { LOGIN_MUTATION } from "../graphql/auth.mutations";
+import {
+  LOGIN_MUTATION,
+  REQUEST_OTP_MUTATION,
+  VERIFY_OTP_LOGIN_MUTATION,
+} from "../graphql/auth.mutations";
 import { ME_QUERY } from "../graphql/auth.queries";
 import type { LoginResponse, LoginVariables } from "../types/auth.types";
 import { Eye, EyeOff } from "lucide-react";
+import { countryCodes, normalizePhone } from "../utils/phone";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -16,41 +21,89 @@ const LoginPage = () => {
     email: "",
     password: "",
   });
+  const [loginMode, setLoginMode] = useState<"password" | "otp">("password");
+  const [otpForm, setOtpForm] = useState({
+    countryCode: "+91",
+    phoneNumber: "",
+    code: "",
+  });
+  const [otpSent, setOtpSent] = useState(false);
+
+  const completeLogin = async (data: LoginResponse["login"]) => {
+    localStorage.setItem("token", data.token);
+    localStorage.setItem("refreshToken", data.refreshToken);
+
+    await apolloClient.clearStore();
+    apolloClient.writeQuery({
+      query: ME_QUERY,
+      data: {
+        me: data.user,
+      },
+    });
+
+    if (data.user.role === "VENDOR") {
+      navigate("/vendor");
+      return;
+    }
+
+    if (data.user.role === "ADMIN") {
+      navigate("/admin");
+      return;
+    }
+
+    navigate("/");
+  };
 
   const [login, { loading }] = useMutation<LoginResponse, LoginVariables>(
     LOGIN_MUTATION,
     {
       onCompleted: async (data) => {
-        localStorage.setItem("token", data.login.token);
-
-        await apolloClient.clearStore();
-        apolloClient.writeQuery({
-          query: ME_QUERY,
-          data: {
-            me: data.login.user,
-          },
-        });
-
-        if (data.login.user.role === "VENDOR") {
-          navigate("/vendor");
-          return;
-        }
-
-        if (data.login.user.role === "ADMIN") {
-          navigate("/admin");
-          return;
-        }
-
-        navigate("/");
+        await completeLogin(data.login);
       },
     },
   );
+  const [requestOtp, { loading: isRequestingOtp }] = useMutation(
+    REQUEST_OTP_MUTATION,
+    {
+      onCompleted: () => setOtpSent(true),
+    }
+  );
+  const [verifyOtpLogin, { loading: isVerifyingOtp }] =
+    useMutation<{ verifyOtpLogin: LoginResponse["login"] }>(
+      VERIFY_OTP_LOGIN_MUTATION,
+      {
+        onCompleted: async (data) => {
+          await completeLogin(data.verifyOtpLogin);
+        },
+      }
+    );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     await login({
       variables: form,
+    });
+  };
+
+  const handleOtpRequest = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    await requestOtp({
+      variables: {
+        phone: normalizePhone(otpForm.countryCode, otpForm.phoneNumber),
+      },
+    });
+  };
+
+  const handleOtpVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    await verifyOtpLogin({
+      variables: {
+        phone: normalizePhone(otpForm.countryCode, otpForm.phoneNumber),
+        code: otpForm.code,
+      },
     });
   };
 
@@ -103,7 +156,29 @@ const LoginPage = () => {
                 dashboard.
               </p>
 
-              <form onSubmit={handleSubmit} className="mt-8 space-y-5">
+              <div className="mt-8 grid grid-cols-2 rounded-2xl bg-gray-100 p-1">
+                <button
+                  type="button"
+                  onClick={() => setLoginMode("password")}
+                  className={`rounded-xl px-4 py-2 text-sm font-semibold ${
+                    loginMode === "password" ? "bg-white shadow-sm" : "text-gray-500"
+                  }`}
+                >
+                  Password
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setLoginMode("otp")}
+                  className={`rounded-xl px-4 py-2 text-sm font-semibold ${
+                    loginMode === "otp" ? "bg-white shadow-sm" : "text-gray-500"
+                  }`}
+                >
+                  OTP
+                </button>
+              </div>
+
+              {loginMode === "password" ? (
+              <form onSubmit={handleSubmit} className="mt-6 space-y-5">
                 <div className="space-y-2">
                   <label
                     className="text-sm font-medium text-gray-700"
@@ -166,6 +241,81 @@ const LoginPage = () => {
                   {loading ? "Logging in..." : "Login"}
                 </button>
               </form>
+              ) : (
+                <form
+                  onSubmit={otpSent ? handleOtpVerify : handleOtpRequest}
+                  className="mt-6 space-y-5"
+                >
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-gray-700">
+                      Phone
+                    </label>
+                    <div className="grid grid-cols-[8.5rem_1fr] gap-3">
+                      <select
+                        value={otpForm.countryCode}
+                        onChange={(e) =>
+                          setOtpForm({ ...otpForm, countryCode: e.target.value })
+                        }
+                        className="rounded-2xl border bg-gray-50 px-3 py-3 text-sm outline-none transition focus:border-black focus:bg-white"
+                      >
+                        {countryCodes.map((country) => (
+                          <option key={country.code} value={country.code}>
+                            {country.code} {country.label}
+                          </option>
+                        ))}
+                      </select>
+                      <input
+                        type="tel"
+                        inputMode="numeric"
+                        value={otpForm.phoneNumber}
+                        onChange={(e) =>
+                          setOtpForm({
+                            ...otpForm,
+                            phoneNumber: e.target.value.replace(/[^\d\s-]/g, ""),
+                          })
+                        }
+                        className="min-w-0 rounded-2xl border bg-gray-50 px-4 py-3 outline-none transition focus:border-black focus:bg-white"
+                        placeholder="9444301708"
+                      />
+                    </div>
+                  </div>
+
+                  {otpSent && (
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium text-gray-700">
+                        OTP Code
+                      </label>
+                      <input
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={6}
+                        value={otpForm.code}
+                        onChange={(e) =>
+                          setOtpForm({
+                            ...otpForm,
+                            code: e.target.value.replace(/\D/g, ""),
+                          })
+                        }
+                        className="w-full rounded-2xl border bg-gray-50 px-4 py-3 outline-none transition focus:border-black focus:bg-white"
+                        placeholder="6-digit code"
+                      />
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    className="w-full rounded-2xl bg-black p-4 text-sm font-semibold text-white transition hover:bg-gray-800"
+                  >
+                    {otpSent
+                      ? isVerifyingOtp
+                        ? "Verifying..."
+                        : "Verify OTP"
+                      : isRequestingOtp
+                        ? "Sending..."
+                        : "Send OTP"}
+                  </button>
+                </form>
+              )}
 
               <p className="mt-6 text-sm text-gray-500">
                 New here?{" "}

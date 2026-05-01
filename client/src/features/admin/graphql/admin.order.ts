@@ -25,6 +25,11 @@ export const GET_ALL_ORDERS = gql`
           }
         }
       }
+      statusHistory {
+        id
+        status
+        createdAt
+      }
     }
   }
 `;

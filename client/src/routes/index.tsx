@@ -6,8 +6,12 @@ import MainLayout from "../layouts/MainLayout";
 import ProductListPage from "../features/products/pages/ProductListPage";
 import CartPage from "../features/cart/pages/CartPage";
 import CheckoutPage from "../features/orders/pages/CheckoutPage";
+import PaymentFailedPage from "../features/orders/pages/PaymentFailedPage";
 import SuccessPage from "../features/orders/pages/SuccessPage";
 import OrdersPage from "../features/orders/pages/OrdersPage";
+import ProfilePage from "../features/auth/pages/ProfilePage";
+import NotificationCenterPage from "../features/notifications/pages/NotificationCenterPage";
+import WishlistPage from "../features/wishlist/pages/WishlistPage";
 import ProductDetailsPage from "../features/products/pages/ProductDetailsPage";
 import CreateVendorProductPage from "../features/vendor/pages/CreateProductPage";
 import EditVendorProductPage from "../features/vendor/pages/EditProductPage";
@@ -87,6 +91,46 @@ const AppRoutes = () => {
               <VendorProductsPage />
             </VendorLayout>
           </RoleProtectedRoute>
+        }
+      />
+      <Route
+        path="/payment-failed"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <PaymentFailedPage />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <ProfilePage />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/notifications"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <NotificationCenterPage />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+      <Route
+        path="/wishlist"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <WishlistPage />
+            </MainLayout>
+          </ProtectedRoute>
         }
       />
       <Route

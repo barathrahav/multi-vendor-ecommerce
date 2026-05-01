@@ -6,10 +6,17 @@ export const userTypeDefs = gql`
   }
 
   extend type Mutation {
+    updateProfile(
+      name: String!
+      email: String!
+      phone: String
+    ): User!
+
     adminCreateUser(
       name: String!
       email: String!
       password: String!
+      phone: String
       role: Role!
     ): User!
 
@@ -17,6 +24,7 @@ export const userTypeDefs = gql`
       id: ID!
       name: String
       email: String
+      phone: String
       role: Role
     ): User!
 

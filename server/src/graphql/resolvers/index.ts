@@ -5,6 +5,9 @@ import { orderResolvers } from "./order.resolver";
 import { productResolvers } from "./product.resolver";
 import { paymentResolvers } from "./payment.resolver";
 import { userResolvers } from "./user.resolver";
+import { notificationResolvers } from "./notification.resolver";
+import { wishlistResolvers } from "./wishlist.resolver";
+import { analyticsResolvers } from "./analytics.resolver";
 
 export const resolvers = {
   Query: {
@@ -19,6 +22,9 @@ export const resolvers = {
     ...cartResolvers.Query,
     ...orderResolvers.Query,
     ...userResolvers.Query,
+    ...notificationResolvers.Query,
+    ...wishlistResolvers.Query,
+    ...analyticsResolvers.Query,
 
   },
 
@@ -30,5 +36,7 @@ export const resolvers = {
     ...orderResolvers.Mutation,
     ...paymentResolvers.Mutation,
     ...userResolvers.Mutation,
+    ...notificationResolvers.Mutation,
+    ...wishlistResolvers.Mutation,
   },
 };

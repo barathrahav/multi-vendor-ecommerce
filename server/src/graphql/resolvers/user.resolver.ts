@@ -5,6 +5,7 @@ import {
   getUsersService,
   updateUserPasswordService,
   updateUserService,
+  updateProfileService,
 } from "../../modules/users/user.service";
 
 export const userResolvers = {
@@ -17,6 +18,18 @@ export const userResolvers = {
   },
 
   Mutation: {
+    updateProfile: async (_: any, args: any, context: any) => {
+      if (!context.user?.id) {
+        throw new Error("Authentication required");
+      }
+
+      return updateProfileService(context.user.id, {
+        name: args.name,
+        email: args.email,
+        phone: args.phone,
+      });
+    },
+
     adminCreateUser: async (_: any, args: any, context: any) => {
       authorizeRoles(context.user?.role, ["ADMIN"]);
 
@@ -24,6 +37,7 @@ export const userResolvers = {
         args.name,
         args.email,
         args.password,
+        args.phone,
         args.role
       );
     },

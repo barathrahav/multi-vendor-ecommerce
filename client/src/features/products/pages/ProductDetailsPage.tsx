@@ -13,6 +13,13 @@ import { GET_PRODUCT } from "../graphql/product.queries";
 import type { ProductDetailsResponse } from "../types/product.types";
 import ProductDetailsSkeleton from "../components/ProductDetailsSkeleton";
 import { getErrorMessage, reportError } from "../../../lib/errors";
+import { X } from "lucide-react";
+import { Heart } from "lucide-react";
+import {
+  ADD_TO_WISHLIST,
+  REMOVE_FROM_WISHLIST,
+} from "../../wishlist/graphql/wishlist.mutations";
+import { GET_MY_WISHLIST } from "../../wishlist/graphql/wishlist.queries";
 
 const currencyFormatter = new Intl.NumberFormat("en-IN", {
   style: "currency",
@@ -31,10 +38,31 @@ const ProductDetailsPage = () => {
       variables: { id },
     }
   );
+  const { data: wishlistData } = useQuery<{
+    myWishlist: Array<{ product: { id: string } }>;
+  }>(GET_MY_WISHLIST, {
+    skip: !localStorage.getItem("token"),
+    fetchPolicy: "cache-and-network",
+  });
+  const isWished =
+    !!id &&
+    (wishlistData?.myWishlist.some((item) => item.product.id === id) ?? false);
 
   const [addToCart, { loading: isAddingToCart }] = useMutation(ADD_TO_CART, {
     update: syncCartMutation("addToCart"),
   });
+  const [addToWishlist, { loading: isAddingWishlist }] = useMutation(
+    ADD_TO_WISHLIST,
+    {
+      refetchQueries: [{ query: GET_MY_WISHLIST }],
+    }
+  );
+  const [removeFromWishlist, { loading: isRemovingWishlist }] = useMutation(
+    REMOVE_FROM_WISHLIST,
+    {
+      refetchQueries: [{ query: GET_MY_WISHLIST }],
+    }
+  );
 
   if (loading) return <ProductDetailsSkeleton />;
 
@@ -91,6 +119,32 @@ const ProductDetailsPage = () => {
     }
   };
 
+  const handleWishlistToggle = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!token || !product) {
+      navigate("/login");
+      return;
+    }
+
+    try {
+      if (isWished) {
+        await removeFromWishlist({
+          variables: { productId: product.id },
+        });
+        toast.success("Removed from wishlist");
+        return;
+      }
+
+      await addToWishlist({
+        variables: { productId: product.id },
+      });
+      toast.success("Added to wishlist");
+    } catch (wishlistError) {
+      toast.error(reportError(wishlistError, "Could not update wishlist"));
+    }
+  };
+
   if (!product) {
     return (
       <div className="rounded-2xl border border-dashed bg-gray-50 p-10 text-center">
@@ -104,7 +158,27 @@ const ProductDetailsPage = () => {
 
   return (
     <div className="mx-auto max-w-6xl">
-      <div className="overflow-hidden rounded-[2rem] border bg-white shadow-sm">
+      <div className="relative overflow-hidden rounded-[2rem] border bg-white shadow-sm">
+        <button
+          type="button"
+          aria-label="Close product details"
+          onClick={() => navigate("/")}
+          className="absolute right-4 top-4 z-20 flex h-10 w-10 items-center justify-center rounded-full border bg-white/90 text-gray-700 shadow-sm transition hover:bg-gray-100"
+        >
+          <X size={20} />
+        </button>
+        <button
+          type="button"
+          aria-label={isWished ? "Remove from wishlist" : "Add to wishlist"}
+          disabled={isAddingWishlist || isRemovingWishlist}
+          onClick={() => void handleWishlistToggle()}
+          className="absolute right-16 top-4 z-20 flex h-10 w-10 items-center justify-center rounded-full border bg-white/90 text-gray-700 shadow-sm transition hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-60"
+        >
+          <Heart
+            size={20}
+            className={isWished ? "fill-red-500 text-red-500" : ""}
+          />
+        </button>
         <div className="grid lg:grid-cols-[1.1fr_0.9fr]">
           <div className="relative min-h-[340px] bg-[radial-gradient(circle_at_top,_#f5f3ff,_#e5e7eb_55%,_#ffffff)] p-6 md:p-10">
             <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.1),rgba(255,255,255,0.8))]" />
@@ -147,12 +221,12 @@ const ProductDetailsPage = () => {
                   </p>
                 </div>
 
-                <div className="rounded-2xl bg-gray-50 p-4">
+                {/* <div className="rounded-2xl bg-gray-50 p-4">
                   <p className="text-sm text-gray-500">Available Stock</p>
                   <p className="mt-2 text-2xl font-bold text-gray-900">
                     {product.stock}
                   </p>
-                </div>
+                </div> */}
 
                 <div className="rounded-2xl bg-gray-50 p-4">
                   <p className="text-sm text-gray-500">Sold By</p>

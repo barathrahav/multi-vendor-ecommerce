@@ -1,9 +1,13 @@
-import { useMutation } from "@apollo/client/react";
+import { useApolloClient, useMutation } from "@apollo/client/react";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
 import Skeleton from "../../../components/common/Skeleton";
-import { CREATE_PAYMENT_ORDER, VERIFY_PAYMENT } from "../graphql/payment.mutations";
+import {
+  CREATE_PAYMENT_ORDER,
+  MARK_PAYMENT_FAILED,
+  VERIFY_PAYMENT,
+} from "../graphql/payment.mutations";
 import { PLACE_ORDER } from "../graphql/order.mutations";
 import type {
   CreatePaymentOrderResponse,
@@ -11,9 +15,11 @@ import type {
 } from "../types/payment.types";
 import type { PlaceOrderResponse } from "../types/order.types";
 import { reportError } from "../../../lib/errors";
+import { clearCartCache } from "../../cart/utils/cartCache";
 
 const CheckoutPage = () => {
   const navigate = useNavigate();
+  const apolloClient = useApolloClient();
 
   const [createPaymentOrder, { loading }] = useMutation<
     CreatePaymentOrderResponse,
@@ -22,6 +28,23 @@ const CheckoutPage = () => {
 
   const [placeOrder] = useMutation<PlaceOrderResponse>(PLACE_ORDER);
   const [verifyPayment] = useMutation(VERIFY_PAYMENT);
+  const [markPaymentFailed] = useMutation(MARK_PAYMENT_FAILED);
+
+  const goToPaymentFailed = async (orderId: string, reason?: string) => {
+    try {
+      await markPaymentFailed({
+        variables: {
+          orderId,
+          reason,
+        },
+      });
+    } catch (error) {
+      console.error(error);
+    }
+
+    localStorage.removeItem("latestOrderId");
+    navigate(`/payment-failed?orderId=${orderId}`);
+  };
 
   const handleCheckout = async () => {
     const toastId = toast.loading("Preparing your checkout...");
@@ -36,6 +59,7 @@ const CheckoutPage = () => {
       }
 
       localStorage.setItem("latestOrderId", orderId);
+      clearCartCache(apolloClient.cache);
 
       const { data } = await createPaymentOrder({
         variables: { orderId },
@@ -59,10 +83,9 @@ const CheckoutPage = () => {
         order_id: razorpayOrderId,
         handler: async function (response: any) {
           const verifyToastId = toast.loading("Verifying payment...");
+          const latestOrderId = localStorage.getItem("latestOrderId");
 
           try {
-            const latestOrderId = localStorage.getItem("latestOrderId");
-
             if (!latestOrderId) {
               toast.error("Order not found", { id: verifyToastId });
               return;
@@ -84,11 +107,30 @@ const CheckoutPage = () => {
             toast.error(reportError(verifyError, "Payment verification failed"), {
               id: verifyToastId,
             });
+            await goToPaymentFailed(latestOrderId || orderId, "Verification failed");
           }
+        },
+        modal: {
+          ondismiss: async function () {
+            const latestOrderId = localStorage.getItem("latestOrderId");
+
+            if (latestOrderId) {
+              await goToPaymentFailed(latestOrderId, "Payment window closed");
+            }
+          },
         },
       };
 
       const rzp = new (window as any).Razorpay(options);
+      rzp.on("payment.failed", async function (response: any) {
+        const latestOrderId = localStorage.getItem("latestOrderId") || orderId;
+        const reason =
+          response?.error?.description ||
+          response?.error?.reason ||
+          "Payment failed";
+
+        await goToPaymentFailed(latestOrderId, reason);
+      });
       rzp.open();
     } catch (checkoutError) {
       toast.error(reportError(checkoutError, "Checkout could not be completed"), {

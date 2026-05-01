@@ -1,7 +1,11 @@
-import { useQuery } from "@apollo/client/react";
+import { useMutation, useQuery } from "@apollo/client/react";
+import toast from "react-hot-toast";
 
 import { GET_MY_ORDERS } from "../graphql/order.queries";
+import { CANCEL_ORDER } from "../graphql/order.mutations";
 import type { OrdersResponse } from "../types/order.types";
+import OrderTimeline from "../components/OrderTimeline";
+import { reportError } from "../../../lib/errors";
 
 const currencyFormatter = new Intl.NumberFormat("en-IN", {
   style: "currency",
@@ -56,6 +60,42 @@ const OrdersPage = () => {
   const { data, loading, error } = useQuery<OrdersResponse>(GET_MY_ORDERS, {
     fetchPolicy: "cache-and-network",
   });
+  const [cancelOrder, { loading: isCancelling }] = useMutation(CANCEL_ORDER, {
+    refetchQueries: [{ query: GET_MY_ORDERS }],
+    awaitRefetchQueries: true,
+  });
+
+  const handleCancelOrder = async (orderId: string, status: string) => {
+    const isPaid = status === "PAID";
+    const confirmed = window.confirm(
+      isPaid
+        ? "Cancel this paid order and start the refund flow?"
+        : "Cancel this order?"
+    );
+
+    if (!confirmed) return;
+
+    const toastId = toast.loading(
+      isPaid ? "Cancelling order and starting refund..." : "Cancelling order..."
+    );
+
+    try {
+      await cancelOrder({
+        variables: { orderId },
+      });
+
+      toast.success(
+        isPaid
+          ? "Order cancelled. Refund status will be sent by email and SMS."
+          : "Order cancelled successfully.",
+        { id: toastId }
+      );
+    } catch (cancelError) {
+      toast.error(reportError(cancelError, "Could not cancel order"), {
+        id: toastId,
+      });
+    }
+  };
 
   if (loading) {
     return <p className="text-sm text-gray-500">Loading orders...</p>;
@@ -85,7 +125,8 @@ const OrdersPage = () => {
           Keep track of every purchase.
         </h1>
         <p className="mt-3 max-w-2xl text-sm leading-7 text-gray-600">
-          Review your latest orders, item breakdowns, totals, and fulfillment status.
+          Review your latest orders, item breakdowns, totals, and fulfillment
+          status.
         </p>
       </section>
 
@@ -94,16 +135,20 @@ const OrdersPage = () => {
         <div className="rounded-[2rem] border border-dashed bg-white p-12 text-center shadow-sm">
           <h2 className="text-2xl font-bold text-gray-900">No orders yet</h2>
           <p className="mt-3 text-sm text-gray-500">
-            Once you place an order, it will appear here with item and status details.
+            Once you place an order, it will appear here with item and status
+            details.
           </p>
         </div>
       ) : (
         <div className="space-y-5">
-          {orders.map((order) => (
-            <article
-              key={order.id}
-              className="rounded-[1.5rem] border bg-white p-6 shadow-sm"
-            >
+          {orders.map((order) => {
+            const canCancel = ["PENDING_PAYMENT", "PAID"].includes(order.status);
+
+            return (
+              <article
+                key={order.id}
+                className="rounded-[1.5rem] border bg-white p-6 shadow-sm"
+              >
               <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                 <div className="space-y-2">
                   <div className="flex flex-wrap items-center gap-3">
@@ -114,7 +159,7 @@ const OrdersPage = () => {
                     {/* ✅ STATUS BADGE */}
                     <span
                       className={`rounded-full px-3 py-1 text-xs font-semibold ${getStatusStyle(
-                        order.status
+                        order.status,
                       )}`}
                     >
                       {order.status}
@@ -126,14 +171,33 @@ const OrdersPage = () => {
                   </p>
                 </div>
 
-                {/* TOTAL */}
-                <div className="rounded-2xl bg-gray-50 p-4">
-                  <p className="text-sm text-gray-500">Total</p>
-                  <p className="mt-1 text-xl font-bold text-gray-900">
-                    {currencyFormatter.format(order.totalAmount)}
-                  </p>
+                <div className="flex flex-col gap-3 sm:items-end">
+                  <div className="rounded-2xl bg-gray-50 p-4">
+                    <p className="text-sm text-gray-500">Total</p>
+                    <p className="mt-1 text-xl font-bold text-gray-900">
+                      {currencyFormatter.format(order.totalAmount)}
+                    </p>
+                  </div>
+
+                  {canCancel && (
+                    <button
+                      type="button"
+                      disabled={isCancelling}
+                      onClick={() => handleCancelOrder(order.id, order.status)}
+                      className="rounded-xl border border-red-200 px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      Cancel Order
+                    </button>
+                  )}
                 </div>
               </div>
+
+              {order.status === "PAID" && canCancel && (
+                <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                  Paid orders are eligible for refund when cancelled. We will
+                  notify you with the refund status after cancellation.
+                </p>
+              )}
 
               {/* ITEMS */}
               <div className="mt-5 grid gap-3">
@@ -143,24 +207,26 @@ const OrdersPage = () => {
                     className="flex items-center justify-between rounded-xl border bg-gray-50 px-4 py-3"
                   >
                     <div>
-                      <p className="font-medium text-gray-900">
-                        {item.name}
-                      </p>
+                      <p className="font-medium text-gray-900">{item.name}</p>
                       <p className="text-sm text-gray-500">
                         Qty: {item.quantity}
                       </p>
                     </div>
 
                     <p className="font-semibold text-gray-900">
-                      {currencyFormatter.format(
-                        item.price * item.quantity
-                      )}
+                      {currencyFormatter.format(item.price * item.quantity)}
                     </p>
                   </div>
                 ))}
               </div>
+              {/* ✅ TIMELINE */}
+              <OrderTimeline
+                history={order.statusHistory || []}
+                currentStatus={order.status}
+              />
             </article>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

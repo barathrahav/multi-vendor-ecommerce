@@ -1,6 +1,6 @@
 import { useApolloClient } from "@apollo/client/react";
-import { useEffect, useState } from "react";
-import { Link, useNavigate, useSearchParams } from "react-router-dom";
+import { useEffect, useRef, useState } from "react";
+import { Link, useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useAuth } from "../../features/auth/hooks/useAuth";
 import { useQuery } from "@apollo/client/react";
 import { GET_CART } from "../../features/cart/graphql/cart.queries";
@@ -14,21 +14,75 @@ import {
   LogOut,
   LayoutDashboard,
   Search,
+  User,
+  ChevronDown,
+  Bell,
+  Heart,
+  Moon,
+  Sun,
 } from "lucide-react";
+import { GET_UNREAD_NOTIFICATION_COUNT } from "../../features/notifications/graphql/notification.queries";
 
 const Navbar = () => {
   const { user, isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const apolloClient = useApolloClient();
   const [searchParams] = useSearchParams();
   const isVendor = user?.role === "VENDOR";
   const isAdmin = user?.role === "ADMIN";
   const isCustomer = user?.role === "CUSTOMER";
   const [searchValue, setSearchValue] = useState(searchParams.get("q") ?? "");
+  const [dashboardOpen, setDashboardOpen] = useState(false);
+  const [accountOpen, setAccountOpen] = useState(false);
+  const [darkMode, setDarkMode] = useState(
+    () => localStorage.getItem("theme") === "dark"
+  );
+  const dashboardRef = useRef<HTMLDivElement | null>(null);
+  const accountRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     setSearchValue(searchParams.get("q") ?? "");
   }, [searchParams]);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", darkMode);
+    localStorage.setItem("theme", darkMode ? "dark" : "light");
+  }, [darkMode]);
+
+  useEffect(() => {
+    setDashboardOpen(false);
+    setAccountOpen(false);
+  }, [location.pathname]);
+
+  useEffect(() => {
+    const handlePointerDown = (event: MouseEvent) => {
+      const target = event.target as Node;
+
+      if (!dashboardRef.current?.contains(target)) {
+        setDashboardOpen(false);
+      }
+
+      if (!accountRef.current?.contains(target)) {
+        setAccountOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        setDashboardOpen(false);
+        setAccountOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handlePointerDown);
+    document.addEventListener("keydown", handleKeyDown);
+
+    return () => {
+      document.removeEventListener("mousedown", handlePointerDown);
+      document.removeEventListener("keydown", handleKeyDown);
+    };
+  }, []);
 
   const { data: cartData, error: cartError } = useQuery<CartResponse>(
     GET_CART,
@@ -37,13 +91,23 @@ const Navbar = () => {
       fetchPolicy: "cache-and-network",
     },
   );
+  const { data: notificationCountData } = useQuery<{
+    unreadNotificationCount: number;
+  }>(GET_UNREAD_NOTIFICATION_COUNT, {
+    skip: !isAuthenticated,
+    fetchPolicy: "cache-and-network",
+  });
 
   const cartCount =
     cartData?.cart?.items.reduce((sum, item) => sum + item.quantity, 0) ?? 0;
+  const unreadNotifications =
+    notificationCountData?.unreadNotificationCount ?? 0;
 
   const handleLogout = async () => {
     localStorage.removeItem("token");
+    localStorage.removeItem("refreshToken");
     await apolloClient.clearStore();
+    setAccountOpen(false);
     navigate("/login");
   };
 
@@ -101,6 +165,15 @@ const Navbar = () => {
             Home
           </Link>
 
+          <button
+            type="button"
+            aria-label="Toggle color theme"
+            onClick={() => setDarkMode((enabled) => !enabled)}
+            className="flex h-9 w-9 items-center justify-center rounded-full border text-gray-600 transition hover:bg-gray-50 hover:text-black"
+          >
+            {darkMode ? <Sun size={18} /> : <Moon size={18} />}
+          </button>
+
           {/* CUSTOMER */}
           {!loading && isAuthenticated && isCustomer && (
             <>
@@ -133,30 +206,42 @@ const Navbar = () => {
 
           {/* DASHBOARD */}
           {!loading && isAuthenticated && (isVendor || isAdmin) && (
-            <details className="relative">
-              <summary className="flex items-center gap-1 cursor-pointer text-sm text-gray-600 hover:text-black">
+            <div className="relative" ref={dashboardRef}>
+              <button
+                type="button"
+                onClick={() => {
+                  setDashboardOpen((open) => !open);
+                  setAccountOpen(false);
+                }}
+                className="flex items-center gap-1 text-sm text-gray-600 hover:text-black"
+              >
                 <LayoutDashboard size={18} />
                 Dashboard
-              </summary>
+                <ChevronDown size={15} />
+              </button>
 
-              <div className="absolute right-0 mt-2 w-56 rounded-xl border bg-white shadow-lg p-2">
+              {dashboardOpen && (
+                <div className="absolute right-0 mt-2 w-56 rounded-xl border bg-white shadow-lg p-2">
                 {isVendor && (
                   <>
                     <Link
                       className="block px-3 py-2 rounded hover:bg-gray-100"
                       to="/vendor"
+                      onClick={() => setDashboardOpen(false)}
                     >
                       Vendor Dashboard
                     </Link>
                     <Link
                       className="block px-3 py-2 rounded hover:bg-gray-100"
                       to="/vendor/products"
+                      onClick={() => setDashboardOpen(false)}
                     >
                       My Products
                     </Link>
                     <Link
                       className="block px-3 py-2 rounded hover:bg-gray-100"
                       to="/vendor/orders"
+                      onClick={() => setDashboardOpen(false)}
                     >
                       Vendor Orders
                     </Link>
@@ -168,31 +253,36 @@ const Navbar = () => {
                     <Link
                       className="block px-3 py-2 rounded hover:bg-gray-100"
                       to="/admin"
+                      onClick={() => setDashboardOpen(false)}
                     >
                       Admin Dashboard
                     </Link>
                     <Link
                       className="block px-3 py-2 rounded hover:bg-gray-100"
                       to="/admin/users"
+                      onClick={() => setDashboardOpen(false)}
                     >
                       Users
                     </Link>
                     <Link
                       className="block px-3 py-2 rounded hover:bg-gray-100"
                       to="/admin/orders"
+                      onClick={() => setDashboardOpen(false)}
                     >
                       Orders
                     </Link>
                     <Link
                       className="block px-3 py-2 rounded hover:bg-gray-100"
                       to="/admin/categories"
+                      onClick={() => setDashboardOpen(false)}
                     >
                       Categories
                     </Link>
                   </>
                 )}
               </div>
-            </details>
+              )}
+            </div>
           )}
 
           {/* AUTH */}
@@ -215,17 +305,74 @@ const Navbar = () => {
               </Link>
             </>
           ) : (
-            <>
-              <span className="text-sm font-medium">{user?.name}</span>
-
+            <div className="relative" ref={accountRef}>
               <button
-                onClick={handleLogout}
-                className="flex items-center gap-1 text-sm bg-black text-white px-3 py-1.5 rounded hover:bg-gray-800"
+                type="button"
+                onClick={() => {
+                  setAccountOpen((open) => !open);
+                  setDashboardOpen(false);
+                }}
+                className="flex items-center gap-2 rounded-full border px-3 py-1.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
               >
-                <LogOut size={18} />
-                Logout
+                <User size={17} />
+                <span className="max-w-28 truncate">{user?.name}</span>
+                <ChevronDown size={15} />
               </button>
-            </>
+
+              {accountOpen && (
+                <div className="absolute right-0 mt-2 w-56 rounded-xl border bg-white p-2 shadow-lg">
+                  <Link
+                    to="/profile"
+                    onClick={() => setAccountOpen(false)}
+                    className="block rounded px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    Profile
+                  </Link>
+                  <Link
+                    to="/notifications"
+                    onClick={() => setAccountOpen(false)}
+                    className="flex items-center justify-between rounded px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                  >
+                    <span className="flex items-center gap-2">
+                      <Bell size={16} />
+                      Notifications
+                    </span>
+                    {unreadNotifications > 0 && (
+                      <span className="rounded-full bg-black px-2 py-0.5 text-xs font-semibold text-white">
+                        {unreadNotifications}
+                      </span>
+                    )}
+                  </Link>
+                  {isCustomer && (
+                    <Link
+                      to="/wishlist"
+                      onClick={() => setAccountOpen(false)}
+                      className="flex items-center gap-2 rounded px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      <Heart size={16} />
+                      Wishlist
+                    </Link>
+                  )}
+                  {isCustomer && (
+                    <Link
+                      to="/orders"
+                      onClick={() => setAccountOpen(false)}
+                      className="block rounded px-3 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                    >
+                      Orders
+                    </Link>
+                  )}
+                  <button
+                    type="button"
+                    onClick={handleLogout}
+                    className="mt-1 flex w-full items-center gap-2 rounded px-3 py-2 text-left text-sm text-red-700 hover:bg-red-50"
+                  >
+                    <LogOut size={17} />
+                    Logout
+                  </button>
+                </div>
+              )}
+            </div>
           )}
         </div>
       </div>
