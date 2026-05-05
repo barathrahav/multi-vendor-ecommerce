@@ -206,12 +206,12 @@ const AdminUsersPage = () => {
   };
 
   if (loading) {
-    return <p className="text-sm text-gray-500">Loading users...</p>;
+    return <p className="text-sm text-slate-500 dark:text-slate-400 animate-pulse">Loading users...</p>;
   }
 
   if (error) {
     return (
-      <div className="rounded-lg border border-red-200 bg-red-50 p-4 text-red-700">
+      <div className="rounded-lg border border-red-200/50 dark:border-red-900/50 bg-red-50/50 dark:bg-red-900/20 p-4 text-red-700 dark:text-red-400 backdrop-blur-sm">
         We could not load users right now.
       </div>
     );
@@ -219,19 +219,19 @@ const AdminUsersPage = () => {
 
   return (
     <div className="mx-auto max-w-6xl space-y-8">
-      <section className="rounded-2xl border bg-white p-6 shadow-sm">
-        <p className="text-sm font-medium uppercase tracking-wide text-gray-500">
+      <section className="rounded-xl border border-slate-200 dark:border-slate-700 bg-gradient-to-br from-white/50 to-slate-50/50 dark:from-slate-900/50 dark:to-slate-800/50 backdrop-blur-sm p-6 shadow-sm dark:shadow-lg">
+        <p className="text-xs font-semibold uppercase tracking-widest text-slate-500 dark:text-slate-400">
           Admin Dashboard
         </p>
-        <h1 className="mt-2 text-3xl font-bold text-gray-900">Users</h1>
-        <p className="mt-2 text-sm text-gray-600">
+        <h1 className="mt-2 text-3xl font-bold text-slate-900 dark:text-white">Users</h1>
+        <p className="mt-2 text-sm text-slate-600 dark:text-slate-400">
           Create accounts, update profile details and roles, reset passwords,
           and remove users when their data is no longer linked to products or orders.
         </p>
       </section>
 
-      <section className="rounded-2xl border bg-white p-6 shadow-sm">
-        <h2 className="text-lg font-semibold text-gray-900">Create User</h2>
+      <section className="rounded-xl border border-slate-200 dark:border-slate-700 bg-gradient-to-br from-white/50 to-slate-50/50 dark:from-slate-900/50 dark:to-slate-800/50 backdrop-blur-sm p-6 shadow-sm dark:shadow-lg">
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Create User</h2>
 
         <form onSubmit={handleCreate} className="mt-4 grid gap-4 md:grid-cols-2">
           <input
@@ -244,7 +244,7 @@ const AdminUsersPage = () => {
               }))
             }
             placeholder="Name"
-            className="rounded-lg border px-4 py-3 outline-none transition focus:border-black"
+            className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 outline-none text-slate-900 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 transition focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
           />
           <input
             type="email"
@@ -256,7 +256,7 @@ const AdminUsersPage = () => {
               }))
             }
             placeholder="Email"
-            className="rounded-lg border px-4 py-3 outline-none transition focus:border-black"
+            className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 outline-none text-slate-900 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 transition focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
           />
           <input
             type="password"
@@ -268,7 +268,7 @@ const AdminUsersPage = () => {
               }))
             }
             placeholder="Password"
-            className="rounded-lg border px-4 py-3 outline-none transition focus:border-black"
+            className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 outline-none text-slate-900 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 transition focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
           />
           <div className="grid grid-cols-[8rem_1fr] gap-3">
             <select
@@ -280,7 +280,7 @@ const AdminUsersPage = () => {
                   countryCode: e.target.value,
                 }))
               }
-              className="rounded-lg border bg-white px-3 py-3 text-sm outline-none transition focus:border-black"
+              className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-3 text-sm outline-none text-slate-900 dark:text-white transition focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
             >
               {countryCodes.map((country) => (
                 <option key={country.code} value={country.code}>
@@ -299,7 +299,7 @@ const AdminUsersPage = () => {
                 }))
               }
               placeholder="Phone"
-              className="min-w-0 rounded-lg border px-4 py-3 outline-none transition focus:border-black"
+              className="min-w-0 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 outline-none text-slate-900 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 transition focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
             />
           </div>
           <select
@@ -310,7 +310,7 @@ const AdminUsersPage = () => {
                 role: e.target.value as AdminUserRole,
               }))
             }
-            className="rounded-lg border bg-white px-4 py-3 outline-none transition focus:border-black"
+            className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-3 outline-none text-slate-900 dark:text-white transition focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
           >
             {roleOptions.map((role) => (
               <option key={role} value={role}>
@@ -322,23 +322,23 @@ const AdminUsersPage = () => {
           <button
             type="submit"
             disabled={isBusy}
-            className="rounded-lg bg-black px-5 py-3 text-sm font-semibold text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-300 md:col-span-2 md:justify-self-start"
+            className="rounded-lg bg-blue-600 dark:bg-blue-500 px-5 py-3 text-sm font-semibold text-white transition hover:bg-blue-700 dark:hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-slate-400 dark:disabled:bg-slate-600 md:col-span-2 md:justify-self-start shadow-sm hover:shadow-md"
           >
             {isCreating ? "Creating..." : "Create User"}
           </button>
         </form>
       </section>
 
-      <section className="rounded-2xl border bg-white p-6 shadow-sm">
+      <section className="rounded-xl border border-slate-200 dark:border-slate-700 bg-gradient-to-br from-white/50 to-slate-50/50 dark:from-slate-900/50 dark:to-slate-800/50 backdrop-blur-sm p-6 shadow-sm dark:shadow-lg">
         <div className="flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-gray-900">All Users</h2>
-          <span className="text-sm text-gray-500">
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">All Users</h2>
+          <span className="text-sm text-slate-500 dark:text-slate-400">
             {users.length} user{users.length === 1 ? "" : "s"}
           </span>
         </div>
 
         {users.length === 0 ? (
-          <div className="mt-6 rounded-xl border border-dashed bg-gray-50 p-8 text-center text-sm text-gray-500">
+          <div className="mt-6 rounded-lg border border-dashed border-slate-300 dark:border-slate-600 bg-slate-50/50 dark:bg-slate-800/50 p-8 text-center text-sm text-slate-500 dark:text-slate-400">
             No users found.
           </div>
         ) : (
@@ -347,7 +347,7 @@ const AdminUsersPage = () => {
               const isEditing = editingUserId === user.id;
 
               return (
-                <div key={user.id} className="rounded-xl border p-4">
+                <div key={user.id} className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white/50 dark:bg-slate-800/50 backdrop-blur-sm p-4 hover:shadow-md dark:hover:shadow-lg transition-shadow">
                   <div className="grid gap-4 lg:grid-cols-[1.4fr_1.6fr_1.8fr_1fr_auto]">
                     {isEditing ? (
                       <>
@@ -383,7 +383,7 @@ const AdminUsersPage = () => {
                                 countryCode: e.target.value,
                               }))
                             }
-                            className="rounded-lg border bg-white px-3 py-2 text-sm outline-none transition focus:border-black"
+                            className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3 py-2 text-sm outline-none text-slate-900 dark:text-white transition focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
                           >
                             {countryCodes.map((country) => (
                               <option key={country.code} value={country.code}>
@@ -401,7 +401,7 @@ const AdminUsersPage = () => {
                                 phoneNumber: e.target.value.replace(/[^\d\s-]/g, ""),
                               }))
                             }
-                            className="min-w-0 rounded-lg border px-4 py-2 outline-none transition focus:border-black"
+                            className="min-w-0 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 outline-none text-slate-900 dark:text-white transition focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
                           />
                         </div>
                         <select
@@ -412,7 +412,7 @@ const AdminUsersPage = () => {
                               role: e.target.value as AdminUserRole,
                             }))
                           }
-                          className="rounded-lg border bg-white px-4 py-2 outline-none transition focus:border-black"
+                          className="rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 outline-none text-slate-900 dark:text-white transition focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
                         >
                           {roleOptions.map((role) => (
                             <option key={role} value={role}>
@@ -425,7 +425,7 @@ const AdminUsersPage = () => {
                             type="button"
                             onClick={() => void handleUpdate(user.id)}
                             disabled={isBusy}
-                            className="rounded-lg bg-black px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-300"
+                            className="rounded-lg bg-blue-600 dark:bg-blue-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 dark:hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-slate-400 dark:disabled:bg-slate-600 shadow-sm hover:shadow-md"
                           >
                             Save
                           </button>
@@ -442,7 +442,7 @@ const AdminUsersPage = () => {
                               });
                             }}
                             disabled={isBusy}
-                            className="rounded-lg border px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+                            className="rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             Cancel
                           </button>
@@ -451,14 +451,14 @@ const AdminUsersPage = () => {
                     ) : (
                       <>
                         <div>
-                          <p className="font-medium text-gray-900">{user.name}</p>
-                          <p className="text-sm text-gray-500">{user.id}</p>
+                          <p className="font-medium text-slate-900 dark:text-white">{user.name}</p>
+                          <p className="text-sm text-slate-500 dark:text-slate-400">{user.id}</p>
                         </div>
-                        <p className="text-sm text-gray-700">{user.email}</p>
-                        <p className="text-sm text-gray-700">
+                        <p className="text-sm text-slate-700 dark:text-slate-300">{user.email}</p>
+                        <p className="text-sm text-slate-700 dark:text-slate-300">
                           {user.phone || "No phone"}
                         </p>
-                        <span className="inline-flex h-fit rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-700">
+                        <span className="inline-flex h-fit rounded-full bg-slate-200 dark:bg-slate-700 px-3 py-1 text-xs font-semibold text-slate-700 dark:text-slate-300">
                           {user.role}
                         </span>
                         <div className="flex gap-3">
@@ -466,7 +466,7 @@ const AdminUsersPage = () => {
                             type="button"
                             onClick={() => startEditing(user)}
                             disabled={isBusy}
-                            className="rounded-lg border px-4 py-2 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+                            className="rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-300 transition hover:bg-slate-50 dark:hover:bg-slate-700 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             Edit
                           </button>
@@ -474,7 +474,7 @@ const AdminUsersPage = () => {
                             type="button"
                             onClick={() => void handleDelete(user.id)}
                             disabled={isBusy}
-                            className="rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700 disabled:cursor-not-allowed disabled:bg-red-300"
+                            className="rounded-lg bg-red-600 dark:bg-red-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-red-700 dark:hover:bg-red-700 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-red-400 dark:disabled:bg-red-400 shadow-sm hover:shadow-md"
                           >
                             Delete
                           </button>
@@ -483,7 +483,7 @@ const AdminUsersPage = () => {
                     )}
                   </div>
 
-                  <div className="mt-4 flex flex-col gap-3 rounded-xl bg-gray-50 p-4 md:flex-row">
+                  <div className="mt-4 flex flex-col gap-3 rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50/50 dark:bg-slate-800/50 p-4 md:flex-row">
                     <input
                       type="password"
                       value={passwordDrafts[user.id] ?? ""}
@@ -494,13 +494,13 @@ const AdminUsersPage = () => {
                         }))
                       }
                       placeholder="Set new password"
-                      className="flex-1 rounded-lg border bg-white px-4 py-2 outline-none transition focus:border-black"
+                      className="flex-1 rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-4 py-2 outline-none text-slate-900 dark:text-white placeholder:text-slate-500 dark:placeholder:text-slate-400 transition focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-500/20 dark:focus:ring-blue-400/20"
                     />
                     <button
                       type="button"
                       onClick={() => void handlePasswordUpdate(user.id)}
                       disabled={isBusy}
-                      className="rounded-lg bg-black px-4 py-2 text-sm font-semibold text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-300"
+                      className="rounded-lg bg-blue-600 dark:bg-blue-500 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700 dark:hover:bg-blue-600 disabled:cursor-not-allowed disabled:opacity-50 disabled:bg-slate-400 dark:disabled:bg-slate-600 shadow-sm hover:shadow-md"
                     >
                       Reset Password
                     </button>

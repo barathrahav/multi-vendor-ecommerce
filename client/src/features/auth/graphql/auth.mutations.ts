@@ -71,3 +71,39 @@ export const VERIFY_OTP_LOGIN_MUTATION = gql`
     }
   }
 `;
+
+export const REQUEST_OTP_REGISTER_MUTATION = gql`
+  mutation RequestOtpRegister($phone: String!) {
+    requestOtpRegister(phone: $phone)
+  }
+`;
+
+export const VERIFY_OTP_REGISTER_MUTATION = gql`
+  mutation VerifyOtpRegister(
+    $name: String!
+    $email: String!
+    $password: String!
+    $phone: String!
+    $code: String!
+    $role: Role
+  ) {
+    verifyOtpRegister(
+      name: $name
+      email: $email
+      password: $password
+      phone: $phone
+      code: $code
+      role: $role
+    ) {
+      token
+      refreshToken
+      user {
+        id
+        name
+        email
+        phone
+        role
+      }
+    }
+  }
+`;

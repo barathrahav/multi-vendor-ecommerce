@@ -30,7 +30,9 @@ const startServer = async () => {
     .split(",")
     .map((origin) => origin.trim());
 
-  app.use(helmet());
+  app.use(helmet({
+    contentSecurityPolicy: false, // ✅ disable CSP
+  }));
   app.use(
     cors({
       origin: allowedOrigins,

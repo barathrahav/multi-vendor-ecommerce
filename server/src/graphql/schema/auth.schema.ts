@@ -23,6 +23,15 @@ export const authTypeDefs = gql`
 
     requestOtp(phone: String!): String!
     verifyOtpLogin(phone: String!, code: String!): AuthResponse!
+    requestOtpRegister(phone: String!): String!
+    verifyOtpRegister(
+      name: String!
+      email: String!
+      password: String!
+      phone: String!
+      code: String!
+      role: Role
+    ): AuthResponse!
     refreshToken(refreshToken: String!): AuthResponse!
   }
 `;

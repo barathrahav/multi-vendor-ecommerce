@@ -119,9 +119,9 @@ const ProductCard = ({
   return (
     <article
       onClick={() => navigate(`/product/${product.id}`)}
-      className="group cursor-pointer overflow-hidden rounded-[1.5rem] border bg-white shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-xl"
+      className="group cursor-pointer overflow-hidden rounded-[1.5rem] border border-gray-200 bg-white/95 shadow-sm transition duration-200 hover:-translate-y-1 hover:shadow-2xl dark:border-gray-800 dark:bg-slate-900/90"
     >
-      <div className="relative overflow-hidden bg-gray-100">
+      <div className="relative overflow-hidden bg-gray-100 dark:bg-slate-950">
         <button
           type="button"
           aria-label={isWished ? "Remove from wishlist" : "Add to wishlist"}
@@ -130,11 +130,11 @@ const ProductCard = ({
             e.stopPropagation();
             void handleWishlistToggle();
           }}
-          className="absolute right-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-gray-700 shadow-sm transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60"
+          className="absolute right-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-white/90 text-gray-700 shadow-sm transition hover:bg-white disabled:cursor-not-allowed disabled:opacity-60 dark:bg-slate-900/90 dark:text-slate-200"
         >
           <Heart
             size={19}
-            className={isWished ? "fill-red-500 text-red-500" : ""}
+            className={isWished ? "fill-red-500 text-red-500" : "text-slate-500 dark:text-slate-300"}
           />
         </button>
         <img
@@ -147,15 +147,15 @@ const ProductCard = ({
       <div className="space-y-4 p-5">
         <div className="space-y-2">
           <div className="flex items-center justify-between gap-3">
-            <h3 className="line-clamp-1 text-lg font-semibold text-gray-900">
+            <h3 className="line-clamp-1 text-lg font-semibold text-gray-900 dark:text-white">
               {product.name}
             </h3>
-            <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600">
+            <span className="rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold text-gray-600 dark:bg-gray-800 dark:text-gray-300">
               {product.category?.name || "General"}
             </span>
           </div>
 
-          <p className="text-2xl font-bold text-gray-900">
+          <p className="text-2xl font-bold text-gray-900 dark:text-white">
             {currencyFormatter.format(product.price)}
           </p>
         </div>
@@ -166,7 +166,7 @@ const ProductCard = ({
             void handleAddToCart();
           }}
           disabled={loading}
-          className="w-full rounded-xl bg-black px-4 py-3 text-sm font-semibold text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-300"
+          className="w-full rounded-2xl bg-black px-4 py-3 text-sm font-semibold text-white shadow-sm transition duration-200 hover:bg-gray-900 disabled:cursor-not-allowed disabled:bg-gray-300 dark:bg-white/10 dark:text-white dark:hover:bg-white/20 dark:disabled:bg-slate-700"
         >
           {loading ? "Adding..." : "Add to Cart"}
         </button>

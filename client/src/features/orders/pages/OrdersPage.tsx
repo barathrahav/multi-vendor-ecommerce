@@ -42,17 +42,17 @@ const formatOrderDate = (createdAt?: string) => {
 const getStatusStyle = (status: string) => {
   switch (status) {
     case "PAID":
-      return "bg-green-100 text-green-700";
+      return "bg-green-100 text-green-700 dark:bg-emerald-900/30 dark:text-emerald-200";
     case "PENDING_PAYMENT":
-      return "bg-yellow-100 text-yellow-700";
+      return "bg-yellow-100 text-yellow-700 dark:bg-amber-900/30 dark:text-amber-200";
     case "SHIPPED":
-      return "bg-blue-100 text-blue-700";
+      return "bg-blue-100 text-blue-700 dark:bg-sky-900/30 dark:text-sky-200";
     case "DELIVERED":
-      return "bg-purple-100 text-purple-700";
+      return "bg-purple-100 text-purple-700 dark:bg-violet-900/30 dark:text-violet-200";
     case "CANCELLED":
-      return "bg-red-100 text-red-700";
+      return "bg-red-100 text-red-700 dark:bg-rose-900/30 dark:text-rose-200";
     default:
-      return "bg-gray-100 text-gray-700";
+      return "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300";
   }
 };
 
@@ -117,14 +117,14 @@ const OrdersPage = () => {
   return (
     <div className="space-y-8">
       {/* HEADER */}
-      <section className="rounded-[2rem] border bg-[linear-gradient(135deg,#eff6ff,#ffffff_45%,#ecfeff)] p-8 shadow-sm">
-        <p className="text-sm font-medium uppercase tracking-[0.2em] text-gray-500">
+      <section className="rounded-[2rem] border border-slate-200 bg-[linear-gradient(135deg,#f8fafc,#ffffff_45%,#eff6ff)] p-8 shadow-sm dark:border-slate-700 dark:bg-slate-950 dark:bg-[linear-gradient(135deg,#020617,#0b1220_45%,#111827)]">
+        <p className="text-sm font-medium uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
           Order History
         </p>
-        <h1 className="mt-3 text-4xl font-black tracking-tight text-gray-900">
+        <h1 className="mt-3 text-4xl font-black tracking-tight text-slate-900 dark:text-white">
           Keep track of every purchase.
         </h1>
-        <p className="mt-3 max-w-2xl text-sm leading-7 text-gray-600">
+        <p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600 dark:text-slate-300">
           Review your latest orders, item breakdowns, totals, and fulfillment
           status.
         </p>
@@ -132,9 +132,9 @@ const OrdersPage = () => {
 
       {/* EMPTY STATE */}
       {orders.length === 0 ? (
-        <div className="rounded-[2rem] border border-dashed bg-white p-12 text-center shadow-sm">
-          <h2 className="text-2xl font-bold text-gray-900">No orders yet</h2>
-          <p className="mt-3 text-sm text-gray-500">
+        <div className="rounded-[2rem] border border-dashed border-slate-200 bg-white/90 p-12 text-center shadow-sm dark:border-slate-700 dark:bg-slate-900/80">
+          <h2 className="text-2xl font-bold text-slate-900 dark:text-white">No orders yet</h2>
+          <p className="mt-3 text-sm text-slate-500 dark:text-slate-400">
             Once you place an order, it will appear here with item and status
             details.
           </p>
@@ -147,12 +147,12 @@ const OrdersPage = () => {
             return (
               <article
                 key={order.id}
-                className="rounded-[1.5rem] border bg-white p-6 shadow-sm"
+                className="rounded-[1.5rem] border border-slate-200 bg-white/95 p-6 shadow-sm transition duration-200 hover:-translate-y-0.5 hover:shadow-xl dark:border-slate-800 dark:bg-slate-900/90"
               >
               <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
                 <div className="space-y-2">
                   <div className="flex flex-wrap items-center gap-3">
-                    <h2 className="text-lg font-semibold text-gray-900">
+                    <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
                       Order #{order.id.slice(0, 8)}
                     </h2>
 
@@ -166,15 +166,15 @@ const OrdersPage = () => {
                     </span>
                   </div>
 
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
                     Placed on {formatOrderDate(order.createdAt)}
                   </p>
                 </div>
 
                 <div className="flex flex-col gap-3 sm:items-end">
-                  <div className="rounded-2xl bg-gray-50 p-4">
-                    <p className="text-sm text-gray-500">Total</p>
-                    <p className="mt-1 text-xl font-bold text-gray-900">
+                  <div className="rounded-2xl bg-slate-50 p-4 dark:bg-slate-950">
+                    <p className="text-sm text-slate-500 dark:text-slate-400">Total</p>
+                    <p className="mt-1 text-xl font-bold text-slate-900 dark:text-white">
                       {currencyFormatter.format(order.totalAmount)}
                     </p>
                   </div>
@@ -184,7 +184,7 @@ const OrdersPage = () => {
                       type="button"
                       disabled={isCancelling}
                       onClick={() => handleCancelOrder(order.id, order.status)}
-                      className="rounded-xl border border-red-200 px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-60"
+                      className="rounded-xl border border-red-200 bg-red-50 px-4 py-2 text-sm font-semibold text-red-700 transition hover:bg-red-100 disabled:cursor-not-allowed disabled:opacity-60 dark:border-rose-800 dark:bg-rose-900/20 dark:text-rose-200 dark:hover:bg-rose-900/30"
                     >
                       Cancel Order
                     </button>
@@ -193,7 +193,7 @@ const OrdersPage = () => {
               </div>
 
               {order.status === "PAID" && canCancel && (
-                <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800">
+                <p className="mt-4 rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-800 dark:border-amber-700 dark:bg-amber-900/15 dark:text-amber-200">
                   Paid orders are eligible for refund when cancelled. We will
                   notify you with the refund status after cancellation.
                 </p>
@@ -204,16 +204,16 @@ const OrdersPage = () => {
                 {order.items.map((item) => (
                   <div
                     key={item.id}
-                    className="flex items-center justify-between rounded-xl border bg-gray-50 px-4 py-3"
+                    className="flex items-center justify-between rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 dark:border-slate-800 dark:bg-slate-950"
                   >
                     <div>
-                      <p className="font-medium text-gray-900">{item.name}</p>
-                      <p className="text-sm text-gray-500">
+                      <p className="font-medium text-slate-900 dark:text-white">{item.name}</p>
+                      <p className="text-sm text-slate-500 dark:text-slate-400">
                         Qty: {item.quantity}
                       </p>
                     </div>
 
-                    <p className="font-semibold text-gray-900">
+                    <p className="font-semibold text-slate-900 dark:text-white">
                       {currencyFormatter.format(item.price * item.quantity)}
                     </p>
                   </div>

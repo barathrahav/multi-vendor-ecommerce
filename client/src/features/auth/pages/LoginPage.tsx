@@ -62,10 +62,16 @@ const LoginPage = () => {
       },
     },
   );
-  const [requestOtp, { loading: isRequestingOtp }] = useMutation(
+  const [requestOtp, { loading: isRequestingOtp }] = useMutation<{ requestOtp: string }>(
     REQUEST_OTP_MUTATION,
     {
-      onCompleted: () => setOtpSent(true),
+      onCompleted: (data) => {
+        setOtpSent(true);
+        alert(data.requestOtp || "OTP sent successfully");
+      },
+      onError: (error) => {
+        alert(error.message || "Failed to send OTP. Please check your phone number and try again.");
+      },
     }
   );
   const [verifyOtpLogin, { loading: isVerifyingOtp }] =
@@ -114,28 +120,28 @@ const LoginPage = () => {
       <Navbar />
 
       <div className="mx-auto max-w-7xl px-6 py-10 md:py-16">
-        <div className="grid overflow-hidden rounded-[2rem] border bg-white shadow-sm lg:grid-cols-[1.05fr_0.95fr]">
-          <section className="bg-[linear-gradient(145deg,#111827,#1f2937_55%,#374151)] p-8 text-white md:p-12">
-            <p className="text-sm font-medium uppercase tracking-[0.22em] text-gray-300">
+        <div className="grid overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900/95 lg:grid-cols-[1.05fr_0.95fr]">
+          <section className="bg-[linear-gradient(145deg,#111827,#1f2937_55%,#374151)] p-8 text-white md:p-12 dark:bg-[linear-gradient(145deg,#020617,#0b1220_55%,#111827)]">
+            <p className="text-sm font-medium uppercase tracking-[0.22em] text-slate-300">
               Welcome Back
             </p>
             <h1 className="mt-4 max-w-xl text-4xl font-black tracking-tight md:text-5xl">
               Sign in and continue where you left off.
             </h1>
-            <p className="mt-5 max-w-lg text-sm leading-7 text-gray-300">
+            <p className="mt-5 max-w-lg text-sm leading-7 text-slate-300">
               Access your cart, orders, and dashboard tools with a cleaner login
               flow designed to get you back into the app quickly.
             </p>
 
             <div className="mt-10 grid gap-4 sm:grid-cols-2">
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                <p className="text-sm text-gray-300">Customer Access</p>
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4 dark:border-white/20 dark:bg-white/10">
+                <p className="text-sm text-slate-300">Customer Access</p>
                 <p className="mt-2 text-lg font-semibold">
                   Cart and orders in sync
                 </p>
               </div>
-              <div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-                <p className="text-sm text-gray-300">Role-based Redirect</p>
+              <div className="rounded-2xl border border-white/10 bg-white/5 p-4 dark:border-white/20 dark:bg-white/10">
+                <p className="text-sm text-slate-300">Role-based Redirect</p>
                 <p className="mt-2 text-lg font-semibold">
                   Admin and vendor ready
                 </p>
@@ -145,23 +151,23 @@ const LoginPage = () => {
 
           <section className="p-8 md:p-12">
             <div className="mx-auto max-w-md">
-              <p className="text-sm font-medium uppercase tracking-[0.2em] text-gray-500">
+              <p className="text-sm font-medium uppercase tracking-[0.2em] text-slate-500 dark:text-slate-400">
                 Account Login
               </p>
-              <h2 className="mt-3 text-3xl font-black tracking-tight text-gray-900">
+              <h2 className="mt-3 text-3xl font-black tracking-tight text-slate-900 dark:text-white">
                 Sign in to your account
               </h2>
-              <p className="mt-3 text-sm leading-7 text-gray-600">
+              <p className="mt-3 text-sm leading-7 text-slate-600 dark:text-slate-300">
                 Enter your email and password to access your shopping flow or
                 dashboard.
               </p>
 
-              <div className="mt-8 grid grid-cols-2 rounded-2xl bg-gray-100 p-1">
+              <div className="mt-8 grid grid-cols-2 rounded-2xl bg-slate-100 p-1 dark:bg-slate-950">
                 <button
                   type="button"
                   onClick={() => setLoginMode("password")}
-                  className={`rounded-xl px-4 py-2 text-sm font-semibold ${
-                    loginMode === "password" ? "bg-white shadow-sm" : "text-gray-500"
+                  className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
+                    loginMode === "password" ? "bg-white shadow-sm dark:bg-slate-900 dark:text-white" : "text-slate-500 dark:text-slate-400"
                   }`}
                 >
                   Password
@@ -169,8 +175,8 @@ const LoginPage = () => {
                 <button
                   type="button"
                   onClick={() => setLoginMode("otp")}
-                  className={`rounded-xl px-4 py-2 text-sm font-semibold ${
-                    loginMode === "otp" ? "bg-white shadow-sm" : "text-gray-500"
+                  className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
+                    loginMode === "otp" ? "bg-white shadow-sm dark:bg-slate-900 dark:text-white" : "text-slate-500 dark:text-slate-400"
                   }`}
                 >
                   OTP
@@ -181,7 +187,7 @@ const LoginPage = () => {
               <form onSubmit={handleSubmit} className="mt-6 space-y-5">
                 <div className="space-y-2">
                   <label
-                    className="text-sm font-medium text-gray-700"
+                    className="text-sm font-medium text-slate-700 dark:text-slate-200"
                     htmlFor="email"
                   >
                     Email
@@ -191,7 +197,7 @@ const LoginPage = () => {
                     type="email"
                     placeholder="you@example.com"
                     value={form.email}
-                    className="w-full rounded-2xl border bg-gray-50 px-4 py-3 outline-none transition focus:border-black focus:bg-white"
+                    className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-slate-950 focus:bg-white dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:border-white dark:focus:bg-slate-900"
                     onChange={(e) =>
                       setForm({
                         ...form,
@@ -203,7 +209,7 @@ const LoginPage = () => {
 
                 <div className="space-y-2">
                   <label
-                    className="text-sm font-medium text-gray-700"
+                    className="text-sm font-medium text-slate-700 dark:text-slate-200"
                     htmlFor="password"
                   >
                     Password
@@ -215,7 +221,7 @@ const LoginPage = () => {
                       type={showPassword ? "text" : "password"}
                       placeholder="Enter your password"
                       value={form.password}
-                      className="w-full rounded-2xl border bg-gray-50 px-4 py-3 pr-12 outline-none transition focus:border-black focus:bg-white"
+                      className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 pr-12 outline-none transition focus:border-slate-950 focus:bg-white dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:border-white dark:focus:bg-slate-900"
                       onChange={(e) =>
                         setForm({
                           ...form,
@@ -227,7 +233,7 @@ const LoginPage = () => {
                     <button
                       type="button"
                       onClick={() => setShowPassword((prev) => !prev)}
-                      className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 hover:text-black"
+                      className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-950 dark:text-slate-400 dark:hover:text-white"
                     >
                       {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
                     </button>
@@ -236,7 +242,7 @@ const LoginPage = () => {
 
                 <button
                   type="submit"
-                  className="w-full rounded-2xl bg-black p-4 text-sm font-semibold text-white transition hover:bg-gray-800"
+                  className="w-full rounded-2xl bg-slate-950 px-5 py-4 text-sm font-semibold text-white shadow-lg shadow-slate-200/10 transition duration-200 hover:bg-slate-900 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
                 >
                   {loading ? "Logging in..." : "Login"}
                 </button>
@@ -247,7 +253,7 @@ const LoginPage = () => {
                   className="mt-6 space-y-5"
                 >
                   <div className="space-y-2">
-                    <label className="text-sm font-medium text-gray-700">
+                    <label className="text-sm font-medium text-slate-700 dark:text-slate-200">
                       Phone
                     </label>
                     <div className="grid grid-cols-[8.5rem_1fr] gap-3">
@@ -256,7 +262,7 @@ const LoginPage = () => {
                         onChange={(e) =>
                           setOtpForm({ ...otpForm, countryCode: e.target.value })
                         }
-                        className="rounded-2xl border bg-gray-50 px-3 py-3 text-sm outline-none transition focus:border-black focus:bg-white"
+                        className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 text-sm outline-none transition focus:border-slate-950 focus:bg-white dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:border-white dark:focus:bg-slate-900"
                       >
                         {countryCodes.map((country) => (
                           <option key={country.code} value={country.code}>
@@ -274,15 +280,15 @@ const LoginPage = () => {
                             phoneNumber: e.target.value.replace(/[^\d\s-]/g, ""),
                           })
                         }
-                        className="min-w-0 rounded-2xl border bg-gray-50 px-4 py-3 outline-none transition focus:border-black focus:bg-white"
-                        placeholder="9444301708"
+                        className="min-w-0 rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-slate-950 focus:bg-white dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:border-white dark:focus:bg-slate-900"
+                        placeholder="9876543210"
                       />
                     </div>
                   </div>
 
                   {otpSent && (
                     <div className="space-y-2">
-                      <label className="text-sm font-medium text-gray-700">
+                      <label className="text-sm font-medium text-slate-700 dark:text-slate-200">
                         OTP Code
                       </label>
                       <input
@@ -296,7 +302,7 @@ const LoginPage = () => {
                             code: e.target.value.replace(/\D/g, ""),
                           })
                         }
-                        className="w-full rounded-2xl border bg-gray-50 px-4 py-3 outline-none transition focus:border-black focus:bg-white"
+                        className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 outline-none transition focus:border-slate-950 focus:bg-white dark:border-slate-700 dark:bg-slate-950 dark:text-white dark:focus:border-white dark:focus:bg-slate-900"
                         placeholder="6-digit code"
                       />
                     </div>
@@ -304,7 +310,7 @@ const LoginPage = () => {
 
                   <button
                     type="submit"
-                    className="w-full rounded-2xl bg-black p-4 text-sm font-semibold text-white transition hover:bg-gray-800"
+                    className="w-full rounded-2xl bg-slate-950 px-5 py-4 text-sm font-semibold text-white shadow-lg shadow-slate-200/10 transition duration-200 hover:bg-slate-900 dark:bg-white/10 dark:text-white dark:hover:bg-white/20"
                   >
                     {otpSent
                       ? isVerifyingOtp
@@ -317,11 +323,11 @@ const LoginPage = () => {
                 </form>
               )}
 
-              <p className="mt-6 text-sm text-gray-500">
+              <p className="mt-6 text-sm text-slate-500 dark:text-slate-400">
                 New here?{" "}
                 <Link
                   to="/register"
-                  className="font-semibold text-gray-900 underline"
+                  className="font-semibold text-slate-900 underline dark:text-white"
                 >
                   Create an account
                 </Link>

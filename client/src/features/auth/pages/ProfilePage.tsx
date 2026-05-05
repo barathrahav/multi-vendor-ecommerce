@@ -32,17 +32,17 @@ const ProfilePage = () => {
   const [updateProfile, { loading: isSaving }] =
     useMutation<UpdateProfileResponse>(UPDATE_PROFILE, {
       onCompleted: async (data) => {
-      apolloClient.writeQuery({
-        query: ME_QUERY,
-        data: {
-          me: data.updateProfile,
-        },
-      });
-      toast.success("Profile updated");
-    },
-    onError: (error) => {
-      toast.error(reportError(error, "Could not update profile"));
-    },
+        apolloClient.writeQuery({
+          query: ME_QUERY,
+          data: {
+            me: data.updateProfile,
+          },
+        });
+        toast.success("Profile updated");
+      },
+      onError: (error) => {
+        toast.error(reportError(error, "Could not update profile"));
+      },
     });
 
   useEffect(() => {
@@ -82,61 +82,90 @@ const ProfilePage = () => {
   }
 
   return (
-    <div className="mx-auto max-w-3xl space-y-8">
-      <section className="rounded-2xl border bg-white p-6 shadow-sm">
-        <p className="text-sm font-medium uppercase tracking-wide text-gray-500">
+    <div
+      className="relative mx-auto max-w-3xl space-y-8 p-2
+    text-gray-900 dark:text-white
+    bg-gradient-to-br from-orange-50 via-white to-blue-50
+    dark:from-gray-900 dark:via-black dark:to-gray-900 rounded-[2rem]"
+    >
+      {/* BACKGROUND GLOW */}
+      <div
+        className="absolute inset-0 -z-10 blur-3xl opacity-30
+      bg-gradient-to-tr from-orange-200 via-blue-200 to-purple-200
+      dark:from-blue-900 dark:via-purple-900 dark:to-black"
+      />
+
+      {/* HEADER */}
+      <section
+        className="rounded-[2rem] border p-6 shadow-lg
+      backdrop-blur bg-white/70 dark:bg-white/5
+      bg-gradient-to-br from-white/80 to-white/40
+      dark:from-white/5 dark:to-transparent"
+      >
+        <p className="text-sm font-medium uppercase tracking-wide text-gray-500 dark:text-gray-400">
           Account
         </p>
-        <h1 className="mt-2 text-3xl font-bold text-gray-900">Profile</h1>
-        <p className="mt-2 text-sm text-gray-600">
+
+        <h1 className="mt-2 text-3xl font-black text-gray-900 dark:text-white">
+          Profile
+        </h1>
+
+        <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">
           Update your contact details for account, order, payment, and refund
           notifications.
         </p>
       </section>
 
+      {/* FORM */}
       <form
         onSubmit={handleSubmit}
-        className="rounded-2xl border bg-white p-6 shadow-sm"
+        className="rounded-[2rem] border p-6 shadow-sm
+      backdrop-blur bg-white/70 dark:bg-white/5
+      bg-gradient-to-br from-white/80 to-white/40
+      dark:from-white/5 dark:to-transparent"
       >
         <div className="grid gap-5">
+          {/* NAME */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700" htmlFor="name">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
               Full Name
             </label>
+
             <input
-              id="name"
               type="text"
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
-              className="w-full rounded-lg border px-4 py-3 outline-none transition focus:border-black"
+              className="input w-full"
             />
           </div>
 
+          {/* EMAIL */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700" htmlFor="email">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
               Email
             </label>
+
             <input
-              id="email"
               type="email"
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
-              className="w-full rounded-lg border px-4 py-3 outline-none transition focus:border-black"
+              className="input w-full"
             />
           </div>
 
+          {/* PHONE */}
           <div className="space-y-2">
-            <label className="text-sm font-medium text-gray-700" htmlFor="phone">
+            <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
               Phone
             </label>
+
             <div className="grid grid-cols-[8.5rem_1fr] gap-3">
               <select
-                aria-label="Country code"
                 value={form.countryCode}
                 onChange={(e) =>
                   setForm({ ...form, countryCode: e.target.value })
                 }
-                className="rounded-lg border bg-white px-3 py-3 text-sm outline-none transition focus:border-black"
+                className="input"
               >
                 {countryCodes.map((country) => (
                   <option key={country.code} value={country.code}>
@@ -144,10 +173,9 @@ const ProfilePage = () => {
                   </option>
                 ))}
               </select>
+
               <input
-                id="phone"
                 type="tel"
-                inputMode="numeric"
                 value={form.phoneNumber}
                 onChange={(e) =>
                   setForm({
@@ -155,16 +183,22 @@ const ProfilePage = () => {
                     phoneNumber: e.target.value.replace(/[^\d\s-]/g, ""),
                   })
                 }
-                className="min-w-0 rounded-lg border px-4 py-3 outline-none transition focus:border-black"
+                className="input"
               />
             </div>
           </div>
         </div>
 
+        {/* BUTTON */}
         <button
           type="submit"
           disabled={isSaving}
-          className="mt-6 rounded-lg bg-black px-5 py-3 text-sm font-semibold text-white transition hover:bg-gray-800 disabled:cursor-not-allowed disabled:bg-gray-300"
+          className="mt-6 w-full rounded-xl px-5 py-3 text-sm font-semibold
+        bg-gradient-to-r from-black to-gray-800
+        dark:from-white dark:to-gray-300
+        text-white dark:text-black
+        hover:scale-[1.02] transition
+        disabled:opacity-50"
         >
           {isSaving ? "Saving..." : "Save Profile"}
         </button>

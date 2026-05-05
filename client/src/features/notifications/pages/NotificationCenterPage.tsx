@@ -25,12 +25,12 @@ const dateFormatter = new Intl.DateTimeFormat("en-IN", {
 });
 
 const typeStyles: Record<string, string> = {
-  ORDER: "bg-blue-50 text-blue-700",
-  ORDER_STATUS: "bg-indigo-50 text-indigo-700",
-  PAYMENT: "bg-emerald-50 text-emerald-700",
-  REFUND: "bg-amber-50 text-amber-700",
-  SECURITY: "bg-red-50 text-red-700",
-  ACCOUNT: "bg-gray-100 text-gray-700",
+  ORDER: "bg-blue-50 text-blue-700 dark:bg-sky-900/30 dark:text-sky-200",
+  ORDER_STATUS: "bg-indigo-50 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-200",
+  PAYMENT: "bg-emerald-50 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-200",
+  REFUND: "bg-amber-50 text-amber-700 dark:bg-amber-900/30 dark:text-amber-200",
+  SECURITY: "bg-red-50 text-red-700 dark:bg-rose-900/30 dark:text-rose-200",
+  ACCOUNT: "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300",
 };
 
 const NotificationCenterPage = () => {
@@ -62,12 +62,12 @@ const NotificationCenterPage = () => {
   const unreadCount = notifications.filter((item) => !item.read).length;
 
   if (loading) {
-    return <p className="text-sm text-gray-500">Loading notifications...</p>;
+    return <p className="text-sm text-slate-500 dark:text-slate-400">Loading notifications...</p>;
   }
 
   if (error) {
     return (
-      <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-red-700">
+      <div className="rounded-2xl border border-red-200 bg-red-50 p-6 text-red-700 shadow-sm dark:border-rose-800 dark:bg-rose-950/80 dark:text-rose-200">
         We could not load notifications right now.
       </div>
     );
