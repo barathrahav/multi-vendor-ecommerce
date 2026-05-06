@@ -133,8 +133,8 @@ const Navbar = () => {
   };
 
   return (
-    <nav className="sticky top-0 z-50 border-b bg-white/70 dark:bg-slate-900/70 backdrop-blur-xl border-slate-200 dark:border-slate-700 shadow-sm dark:shadow-xl">
-      <div className="flex items-center justify-between px-6 py-3 gap-6">
+    <nav className="sticky top-0 z-50 border-b border-slate-200/70 dark:border-slate-700/70 bg-white/90 dark:bg-slate-950/90 backdrop-blur-xl shadow-sm dark:shadow-xl">
+      <div className="page-shell flex h-16 items-center justify-between gap-4">
         {/* Logo */}
         <Link
           to="/"
@@ -146,7 +146,7 @@ const Navbar = () => {
         {/* Search */}
         <form
           onSubmit={handleSearchSubmit}
-          className="hidden md:flex w-full max-w-xl"
+          className="hidden md:flex flex-1 max-w-3xl"
         >
           <div className="flex w-full items-center rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 py-2 focus-within:ring-2 focus-within:ring-blue-500/50 dark:focus-within:ring-blue-400/50 transition-all">
             <Search size={18} className="text-slate-400 dark:text-slate-500 mr-2" />
@@ -174,7 +174,7 @@ const Navbar = () => {
             type="button"
             aria-label="Toggle color theme"
             onClick={() => setDarkMode((enabled) => !enabled)}
-            className="flex h-9 w-9 items-center justify-center rounded-lg border border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200 transition-all hover:shadow-sm"
+            className="icon-btn"
           >
             {darkMode ? <Sun size={18} /> : <Moon size={18} />}
           </button>

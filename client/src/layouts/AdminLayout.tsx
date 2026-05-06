@@ -24,23 +24,15 @@ const AdminLayout = ({ children }: any) => {
   ];
 
   return (
-    <div className="min-h-screen
-      bg-gradient-to-br from-orange-50 via-white to-blue-50
-      dark:from-gray-900 dark:via-black dark:to-gray-900">
+    <div className="app-shell min-h-screen bg-gradient-to-br from-orange-50 via-white to-blue-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
 
       <Navbar />
 
-      <div className="flex">
+      <div className="page-shell flex flex-col gap-6 lg:flex-row lg:items-start">
 
         {/* SIDEBAR */}
-        <aside
-          className="w-64 min-h-[calc(100vh-64px)] p-5
-          border-r
-          bg-white/70 dark:bg-gray-900/70
-          backdrop-blur-xl
-          border-gray-200 dark:border-gray-800"
-        >
-          <h2 className="mb-6 text-lg font-bold text-gray-900 dark:text-white">
+        <aside className="w-full lg:w-72 rounded-[1.75rem] border border-slate-200/70 dark:border-slate-700/70 bg-white/95 dark:bg-slate-950/90 shadow-sm p-5">
+          <h2 className="mb-6 text-lg font-semibold text-slate-900 dark:text-white">
             Admin Panel
           </h2>
 
@@ -53,11 +45,10 @@ const AdminLayout = ({ children }: any) => {
                 <Link
                   key={item.path}
                   to={item.path}
-                  className={`flex items-center gap-3 px-3 py-2 rounded-xl text-sm font-medium transition
-                    ${
+                  className={`flex items-center gap-3 px-4 py-3 rounded-2xl text-sm font-medium transition-all duration-200 ${
                       isActive
-                        ? "bg-gradient-to-r from-black to-gray-800 dark:from-white dark:to-gray-300 text-white dark:text-black shadow-sm"
-                        : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800"
+                        ? "bg-slate-900 text-white dark:bg-slate-200 dark:text-slate-950 shadow-sm"
+                        : "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800"
                     }`}
                 >
                   {item.icon}
@@ -70,18 +61,10 @@ const AdminLayout = ({ children }: any) => {
         </aside>
 
         {/* MAIN CONTENT */}
-        <main className="flex-1 p-6">
-
-          <div
-            className="rounded-2xl border
-            bg-white/80 dark:bg-white/5
-            backdrop-blur
-            border-gray-200 dark:border-gray-800
-            shadow-sm p-6"
-          >
+        <main className="flex-1">
+          <div className="page-card p-6">
             {children}
           </div>
-
         </main>
 
       </div>

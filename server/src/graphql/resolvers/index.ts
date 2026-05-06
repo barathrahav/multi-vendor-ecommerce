@@ -8,6 +8,7 @@ import { userResolvers } from "./user.resolver";
 import { notificationResolvers } from "./notification.resolver";
 import { wishlistResolvers } from "./wishlist.resolver";
 import { analyticsResolvers } from "./analytics.resolver";
+import { relationResolvers } from "../relation.resolver";
 
 export const resolvers = {
   Query: {
@@ -39,4 +40,6 @@ export const resolvers = {
     ...notificationResolvers.Mutation,
     ...wishlistResolvers.Mutation,
   },
+
+  ...relationResolvers,
 };

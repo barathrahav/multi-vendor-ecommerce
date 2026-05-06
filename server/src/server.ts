@@ -15,6 +15,8 @@ import { getMetricsSnapshot } from "./config/metrics";
 import { initRealtime } from "./config/realtime";
 import { apiRateLimiter, otpRateLimiter } from "./middleware/rateLimit";
 import { metricsMiddleware } from "./middleware/metrics.middleware";
+import { persistedQueriesMiddleware } from "./graphql/persistedQueries";
+import { createQueryComplexityPlugin } from "./graphql/queryComplexity";
 
 const startServer = async () => {
   if (process.env.SENTRY_DSN) {
@@ -67,6 +69,7 @@ const startServer = async () => {
   const server = new ApolloServer({
     typeDefs,
     resolvers,
+    introspection: true,
     formatError: (formattedError) => {
       if (process.env.SENTRY_DSN) {
         Sentry.captureException(formattedError);
@@ -75,10 +78,12 @@ const startServer = async () => {
       logger.error({ error: formattedError }, "GraphQL error");
       return formattedError;
     },
+    plugins: [createQueryComplexityPlugin()],
   });
 
   await server.start();
 
+  app.use("/graphql", persistedQueriesMiddleware);
   app.use(
     "/graphql",
     expressMiddleware(server, {

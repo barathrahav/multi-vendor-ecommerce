@@ -6,9 +6,11 @@ const MainLayout = ({
   children: React.ReactNode;
 }) => {
   return (
-    <div>
+    <div className="app-shell">
       <Navbar />
-      <main className="p-6">{children}</main>
+      <main className="page-shell py-8">
+        <div className="space-y-8">{children}</div>
+      </main>
     </div>
   );
 };
