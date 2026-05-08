@@ -1,8 +1,13 @@
+import type { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import Navbar from "../components/layout/Navbar";
-import { Users, ShoppingCart, Layers } from "lucide-react";
+import { Users, ShoppingCart, Layers, Image } from "lucide-react";
 
-const AdminLayout = ({ children }: any) => {
+interface AdminLayoutProps {
+  children: ReactNode;
+}
+
+const AdminLayout = ({ children }: AdminLayoutProps) => {
   const location = useLocation();
 
   const navItems = [
@@ -20,6 +25,11 @@ const AdminLayout = ({ children }: any) => {
       name: "Categories",
       path: "/admin/categories",
       icon: <Layers size={16} />,
+    },
+    {
+      name: "Carousel",
+      path: "/admin/carousel",
+      icon: <Image size={16} />,
     },
   ];
 

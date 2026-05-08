@@ -4,6 +4,7 @@ import RegisterPage from "../features/auth/pages/RegisterPage";
 import ProtectedRoute from "./ProtectedRoute";
 import MainLayout from "../layouts/MainLayout";
 import ProductListPage from "../features/products/pages/ProductListPage";
+import LandingPage from "../pages/LandingPage";
 import CartPage from "../features/cart/pages/CartPage";
 import CheckoutPage from "../features/orders/pages/CheckoutPage";
 import PaymentFailedPage from "../features/orders/pages/PaymentFailedPage";
@@ -23,12 +24,21 @@ import AdminLayout from "../layouts/AdminLayout";
 import AdminCategoriesPage from "../features/admin/pages/AdminCategoriesPage";
 import AdminUsersPage from "../features/admin/pages/AdminUsersPage";
 import AdminOrdersPage from "../features/admin/pages/AdminOrdersPage";
+import AdminCarouselPage from "../features/admin/pages/AdminCarouselPage";
 
 const AppRoutes = () => {
   return (
     <Routes>
       <Route
         path="/"
+        element={
+          <MainLayout>
+            <LandingPage />
+          </MainLayout>
+        }
+      />
+      <Route
+        path="/products"
         element={
           <MainLayout>
             <ProductListPage />
@@ -205,6 +215,16 @@ const AppRoutes = () => {
           <RoleProtectedRoute allowedRoles={["ADMIN"]}>
             <AdminLayout>
               <AdminCategoriesPage />
+            </AdminLayout>
+          </RoleProtectedRoute>
+        }
+      />
+      <Route
+        path="/admin/carousel"
+        element={
+          <RoleProtectedRoute allowedRoles={["ADMIN"]}>
+            <AdminLayout>
+              <AdminCarouselPage />
             </AdminLayout>
           </RoleProtectedRoute>
         }

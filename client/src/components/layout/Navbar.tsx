@@ -2,7 +2,6 @@ import { useApolloClient } from "@apollo/client/react";
 import { useEffect, useRef, useState } from "react";
 import {
   Link,
-  useLocation,
   useNavigate,
   useSearchParams,
 } from "react-router-dom";
@@ -25,13 +24,18 @@ import {
   Heart,
   Moon,
   Sun,
+  Image,
+  Layers,
+  Users,
+  Package,
+  PlusCircle,
 } from "lucide-react";
 import { GET_UNREAD_NOTIFICATION_COUNT } from "../../features/notifications/graphql/notification.queries";
+
 
 const Navbar = () => {
   const { user, isAuthenticated, loading } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
   const apolloClient = useApolloClient();
   const [searchParams] = useSearchParams();
   const isVendor = user?.role === "VENDOR";
@@ -47,18 +51,9 @@ const Navbar = () => {
   const accountRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    setSearchValue(searchParams.get("q") ?? "");
-  }, [searchParams]);
-
-  useEffect(() => {
     document.documentElement.classList.toggle("dark", darkMode);
     localStorage.setItem("theme", darkMode ? "dark" : "light");
   }, [darkMode]);
-
-  useEffect(() => {
-    setDashboardOpen(false);
-    setAccountOpen(false);
-  }, [location.pathname]);
 
   useEffect(() => {
     const handlePointerDown = (event: MouseEvent) => {
@@ -99,7 +94,7 @@ const Navbar = () => {
   const { data: notificationCountData } = useQuery<{
     unreadNotificationCount: number;
   }>(GET_UNREAD_NOTIFICATION_COUNT, {
-    skip: !isAuthenticated,
+    skip: !isAuthenticated || loading,
     fetchPolicy: "cache-and-network",
   });
 
@@ -138,9 +133,10 @@ const Navbar = () => {
         {/* Logo */}
         <Link
           to="/"
-          className="text-xl font-bold tracking-tight text-slate-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
+          className="flex items-center gap-2 text-xl font-bold tracking-tight text-slate-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 transition-colors"
         >
-          🛒 E-Commerce
+          <ShoppingCart size={22} />
+          E-Commerce
         </Link>
 
         {/* Search */}
@@ -252,7 +248,8 @@ const Navbar = () => {
                                     hover:bg-slate-100 dark:hover:bg-slate-700
                                     transition-colors"
                       >
-                        🏪 Vendor Dashboard
+                        <LayoutDashboard size={16} /> 
+                        Vendor Dashboard
                       </Link>
 
                       <Link
@@ -263,7 +260,20 @@ const Navbar = () => {
                                     hover:bg-slate-100 dark:hover:bg-slate-700
                                     transition-colors"
                       >
-                        🛍 My Products
+                        <Package size={16} />
+                         My Products
+                      </Link>
+
+                      <Link
+                        to="/vendor/create"
+                        onClick={() => setDashboardOpen(false)}
+                        className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium
+                                    text-slate-700 dark:text-slate-300
+                                    hover:bg-slate-100 dark:hover:bg-slate-700
+                                    transition-colors"
+                      >
+                        <PlusCircle size={16} />
+                         Create Product
                       </Link>
 
                       <Link
@@ -274,7 +284,8 @@ const Navbar = () => {
                                     hover:bg-slate-100 dark:hover:bg-slate-700
                                     transition-colors"
                       >
-                        🚚 Vendor Orders
+                        <ShoppingCart size={16} />
+                         Vendor Orders
                       </Link>
                     </div>
                   )}
@@ -296,7 +307,8 @@ const Navbar = () => {
                                     hover:bg-slate-100 dark:hover:bg-slate-700
                                     transition-colors"
                       >
-                        📊 Admin Dashboard
+                        <LayoutDashboard size={16} />
+                         Admin Dashboard
                       </Link>
 
                       <Link
@@ -307,7 +319,8 @@ const Navbar = () => {
                                     hover:bg-slate-100 dark:hover:bg-slate-700
                                     transition-colors"
                       >
-                        👥 Users
+                        <Users size={16} />
+                         Users
                       </Link>
 
                       <Link
@@ -318,7 +331,8 @@ const Navbar = () => {
                                     hover:bg-slate-100 dark:hover:bg-slate-700
                                     transition-colors"
                       >
-                        📦 Orders
+                        <ShoppingCart size={16} />
+                         Orders
                       </Link>
 
                       <Link
@@ -329,7 +343,20 @@ const Navbar = () => {
                                     hover:bg-slate-100 dark:hover:bg-slate-700
                                     transition-colors"
                       >
-                        🏷 Categories
+                        <Layers size={16} />
+                         Categories
+                      </Link>
+
+                      <Link
+                        to="/admin/carousel"
+                        onClick={() => setDashboardOpen(false)}
+                        className="flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium
+                                    text-slate-700 dark:text-slate-300
+                                    hover:bg-slate-100 dark:hover:bg-slate-700
+                                    transition-colors"
+                      >
+                        <Image size={16} />
+                         Carousel
                       </Link>
                     </div>
                   )}
@@ -461,7 +488,11 @@ const Navbar = () => {
                                   hover:bg-slate-100 dark:hover:bg-slate-700
                                   transition-colors"
                     >
-                      📦 Orders
+                      <Package
+                        size={16}
+                        className="text-slate-500 dark:text-slate-400"
+                      />
+                      Orders
                     </Link>
                   )}
 
@@ -491,3 +522,6 @@ const Navbar = () => {
 };
 
 export default Navbar;
+
+
+

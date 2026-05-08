@@ -9,6 +9,7 @@ import { userTypeDefs } from "./user.schema";
 import { notificationTypeDefs } from "./notification.schema";
 import { wishlistTypeDefs } from "./wishlist.schema";
 import { analyticsTypeDefs } from "./analytics.schema";
+import { carouselTypeDefs } from "./carousel.typedefs";
 
 const baseTypeDefs = gql`
   enum Role {
@@ -48,5 +49,6 @@ export const typeDefs = [
   notificationTypeDefs,
   wishlistTypeDefs,
   analyticsTypeDefs,
+  carouselTypeDefs,
 ];
 

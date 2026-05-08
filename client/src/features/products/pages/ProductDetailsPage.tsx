@@ -2,6 +2,7 @@ import { useApolloClient, useMutation, useQuery } from "@apollo/client/react";
 import toast from "react-hot-toast";
 import { useNavigate, useParams } from "react-router-dom";
 import { X, Heart } from "lucide-react";
+import { useAuth } from "../../auth/hooks/useAuth";
 
 import { ADD_TO_CART } from "../../cart/graphql/cart.mutations";
 import {
@@ -12,7 +13,10 @@ import {
 } from "../../cart/utils/cartCache";
 
 import { GET_PRODUCT } from "../graphql/product.queries";
-import type { ProductDetailsResponse } from "../types/product.types";
+import type {
+  ProductDetailsResponse,
+  WishlistResponse,
+} from "../types/product.types";
 import ProductDetailsSkeleton from "../components/ProductDetailsSkeleton";
 
 import {
@@ -33,19 +37,20 @@ const ProductDetailsPage = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const apolloClient = useApolloClient();
+  const { role } = useAuth();
 
   const { data, loading, error } = useQuery<ProductDetailsResponse>(
     GET_PRODUCT,
     { variables: { id } }
   );
 
-  const { data: wishlistData } = useQuery<any>(GET_MY_WISHLIST, {
-    skip: !localStorage.getItem("token"),
+  const { data: wishlistData } = useQuery<WishlistResponse>(GET_MY_WISHLIST, {
+    skip: role !== "CUSTOMER",
   });
 
   const isWished =
     !!id &&
-    wishlistData?.myWishlist.some((i: any) => i.product.id === id);
+    wishlistData?.myWishlist.some((item) => item.product.id === id);
 
   const [addToCart, { loading: isAddingToCart }] = useMutation(ADD_TO_CART, {
     update: syncCartMutation("addToCart"),

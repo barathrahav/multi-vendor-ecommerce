@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useApolloClient, useMutation } from "@apollo/client/react";
+import toast from "react-hot-toast";
 
 import Navbar from "../../../components/layout/Navbar";
 import { ME_QUERY } from "../graphql/auth.queries";
@@ -16,6 +17,7 @@ import type {
 } from "../types/auth.types";
 import { countryCodes, normalizePhone } from "../utils/phone";
 import { Eye, EyeOff, ArrowLeft } from "lucide-react";
+import { getErrorMessage } from "../../../lib/errors";
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -36,7 +38,20 @@ const RegisterPage = () => {
   const [requestOtpRegister, { loading: otpLoading }] = useMutation<
     RequestOtpRegisterResponse,
     RequestOtpRegisterVariables
-  >(REQUEST_OTP_REGISTER_MUTATION);
+  >(REQUEST_OTP_REGISTER_MUTATION, {
+    onCompleted: () => {
+      toast.success("OTP sent successfully");
+      setStep("otp");
+    },
+    onError: (error) => {
+      toast.error(
+        getErrorMessage(
+          error,
+          "Failed to send OTP. Please check your phone number and try again."
+        )
+      );
+    },
+  });
 
   const [verifyOtpRegister, { loading: verifyLoading }] = useMutation<
     VerifyOtpRegisterResponse,
@@ -54,69 +69,91 @@ const RegisterPage = () => {
         },
       });
 
+      toast.success("Registration successful!");
       navigate("/");
+    },
+    onError: (error) => {
+      toast.error(getErrorMessage(error, "Registration failed"));
     },
   });
 
   const handleSendOtp = async () => {
     // Basic validation
-    if (!form.name || !form.email || !form.phoneNumber || !form.password || !form.confirmPassword) {
-      alert("Please fill in all fields");
+    if (!form.name.trim()) {
+      toast.error("Please enter your full name");
+      return;
+    }
+
+    if (!form.email.trim()) {
+      toast.error("Please enter your email");
+      return;
+    }
+
+    if (!form.phoneNumber.trim()) {
+      toast.error("Please enter your phone number");
+      return;
+    }
+
+    if (!form.password.trim()) {
+      toast.error("Please enter a password");
+      return;
+    }
+
+    if (!form.confirmPassword.trim()) {
+      toast.error("Please confirm your password");
       return;
     }
 
     if (form.password !== form.confirmPassword) {
-      alert("Passwords do not match");
+      toast.error("Passwords do not match");
+      return;
+    }
+
+    if (form.password.length < 6) {
+      toast.error("Password must be at least 6 characters");
       return;
     }
 
     const phone = normalizePhone(form.countryCode, form.phoneNumber);
     if (!phone) {
-      alert("Please enter a valid phone number");
+      toast.error("Please enter a valid phone number");
       return;
     }
 
-    try {
-      const result = await requestOtpRegister({
-        variables: { phone },
-      });
-      alert(result.data?.requestOtpRegister || "OTP sent successfully");
-      setStep("otp");
-    } catch (error: any) {
-      console.error(error);
-      alert(error.message || "Failed to send OTP. Please check your phone number and try again.");
-    }
+    await requestOtpRegister({
+      variables: { phone },
+    });
   };
 
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!otp) {
-      alert("Please enter OTP");
+    if (!otp.trim()) {
+      toast.error("Please enter OTP");
+      return;
+    }
+
+    if (otp.length !== 6) {
+      toast.error("OTP must be 6 digits");
       return;
     }
 
     const phone = normalizePhone(form.countryCode, form.phoneNumber);
     if (!phone) {
-      alert("Invalid phone number");
+      toast.error("Invalid phone number");
       return;
     }
 
-    try {
-      await verifyOtpRegister({
-        variables: {
-          name: form.name,
-          email: form.email,
-          phone,
-          password: form.password,
-          code: otp,
-          role: "CUSTOMER",
-        },
-      });
-    } catch (error: any) {
-      console.error(error);
-      alert(error.message || "Registration failed");
-    }
+    await verifyOtpRegister({
+      variables: {
+        name: form.name,
+        email: form.email,
+        phone,
+        password: form.password,
+        code: otp,
+        role: "CUSTOMER",
+      },
+    });
   };
 
   const handleBackToForm = () => {

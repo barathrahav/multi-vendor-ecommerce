@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useApolloClient, useMutation } from "@apollo/client/react";
 import toast from "react-hot-toast";
 
@@ -14,17 +14,22 @@ type UpdateProfileResponse = {
     name: string;
     email: string;
     phone?: string | null;
-    role: string;
+    role: string | null;
   };
 };
 
-const ProfilePage = () => {
+type ProfileUser = UpdateProfileResponse["updateProfile"];
+
+interface ProfileFormProps {
+  user: ProfileUser;
+}
+
+const ProfileForm = ({ user }: ProfileFormProps) => {
   const apolloClient = useApolloClient();
-  const { user, loading } = useAuth();
-  const initialPhone = splitPhone(user?.phone);
+  const initialPhone = splitPhone(user.phone);
   const [form, setForm] = useState({
-    name: "",
-    email: "",
+    name: user.name,
+    email: user.email,
     countryCode: initialPhone.countryCode,
     phoneNumber: initialPhone.phoneNumber,
   });
@@ -45,18 +50,6 @@ const ProfilePage = () => {
       },
     });
 
-  useEffect(() => {
-    if (!user) return;
-
-    const phone = splitPhone(user.phone);
-    setForm({
-      name: user.name,
-      email: user.email,
-      countryCode: phone.countryCode,
-      phoneNumber: phone.phoneNumber,
-    });
-  }, [user]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -76,10 +69,6 @@ const ProfilePage = () => {
       },
     });
   };
-
-  if (loading) {
-    return <p className="text-sm text-gray-500">Loading profile...</p>;
-  }
 
   return (
     <div
@@ -205,6 +194,20 @@ const ProfilePage = () => {
       </form>
     </div>
   );
+};
+
+const ProfilePage = () => {
+  const { user, loading } = useAuth();
+
+  if (loading) {
+    return <p className="text-sm text-gray-500">Loading profile...</p>;
+  }
+
+  if (!user) {
+    return <p className="text-sm text-gray-500">Profile unavailable.</p>;
+  }
+
+  return <ProfileForm key={user.id} user={user} />;
 };
 
 export default ProfilePage;

@@ -21,3 +21,5 @@ export const createContext = async ({
     loaders,
   };
 };
+
+export type AppContext = Awaited<ReturnType<typeof createContext>>;

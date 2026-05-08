@@ -62,6 +62,31 @@ export interface ProductDetailsResponse {
   };
 }
 
+export interface WishlistItem {
+  id: string;
+  createdAt: string;
+  product: Product;
+}
+
+export interface WishlistResponse {
+  myWishlist: WishlistItem[];
+}
+
+export interface CarouselSlide {
+  id: string;
+  title: string;
+  description: string;
+  imageUrl: string;
+  isActive: boolean;
+  order: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CarouselSlidesResponse {
+  carouselSlides: CarouselSlide[];
+}
+
 export interface CreateProductResponse {
   createProduct: Product;
 }

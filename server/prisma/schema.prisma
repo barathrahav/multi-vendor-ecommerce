@@ -243,3 +243,14 @@ model VendorSubOrder {
   @@unique([orderId, vendorId])
   @@index([vendorId, status])
 }
+
+model CarouselSlide {
+  id          String   @id @default(uuid())
+  title       String
+  description String
+  imageUrl    String
+  isActive    Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

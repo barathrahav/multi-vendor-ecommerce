@@ -1,8 +1,13 @@
+import type { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import Navbar from "../components/layout/Navbar";
 import { Package, PlusCircle, ShoppingCart } from "lucide-react";
 
-const VendorLayout = ({ children }: any) => {
+interface VendorLayoutProps {
+  children: ReactNode;
+}
+
+const VendorLayout = ({ children }: VendorLayoutProps) => {
   const location = useLocation();
 
   const navItems = [

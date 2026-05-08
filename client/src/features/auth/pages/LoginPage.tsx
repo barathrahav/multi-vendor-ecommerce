@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useApolloClient, useMutation } from "@apollo/client/react";
+import toast from "react-hot-toast";
 
 import Navbar from "../../../components/layout/Navbar";
 import {
@@ -12,6 +13,7 @@ import { ME_QUERY } from "../graphql/auth.queries";
 import type { LoginResponse, LoginVariables } from "../types/auth.types";
 import { Eye, EyeOff } from "lucide-react";
 import { countryCodes, normalizePhone } from "../utils/phone";
+import { getErrorMessage } from "../../../lib/errors";
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -58,7 +60,11 @@ const LoginPage = () => {
     LOGIN_MUTATION,
     {
       onCompleted: async (data) => {
+        toast.success("Login successful!");
         await completeLogin(data.login);
+      },
+      onError: (error) => {
+        toast.error(getErrorMessage(error, "Login failed. Please try again."));
       },
     },
   );
@@ -67,10 +73,15 @@ const LoginPage = () => {
     {
       onCompleted: (data) => {
         setOtpSent(true);
-        alert(data.requestOtp || "OTP sent successfully");
+        toast.success(data.requestOtp || "OTP sent successfully");
       },
       onError: (error) => {
-        alert(error.message || "Failed to send OTP. Please check your phone number and try again.");
+        toast.error(
+          getErrorMessage(
+            error,
+            "Failed to send OTP. Please check your phone number and try again."
+          )
+        );
       },
     }
   );
@@ -79,13 +90,29 @@ const LoginPage = () => {
       VERIFY_OTP_LOGIN_MUTATION,
       {
         onCompleted: async (data) => {
+          toast.success("Login successful!");
           await completeLogin(data.verifyOtpLogin);
+        },
+        onError: (error) => {
+          toast.error(
+            getErrorMessage(error, "OTP verification failed. Please try again.")
+          );
         },
       }
     );
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!form.email.trim()) {
+      toast.error("Please enter your email");
+      return;
+    }
+
+    if (!form.password.trim()) {
+      toast.error("Please enter your password");
+      return;
+    }
 
     await login({
       variables: form,
@@ -95,9 +122,20 @@ const LoginPage = () => {
   const handleOtpRequest = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!otpForm.phoneNumber.trim()) {
+      toast.error("Please enter your phone number");
+      return;
+    }
+
+    const phone = normalizePhone(otpForm.countryCode, otpForm.phoneNumber);
+    if (!phone) {
+      toast.error("Please enter a valid phone number");
+      return;
+    }
+
     await requestOtp({
       variables: {
-        phone: normalizePhone(otpForm.countryCode, otpForm.phoneNumber),
+        phone,
       },
     });
   };
@@ -105,9 +143,25 @@ const LoginPage = () => {
   const handleOtpVerify = async (e: React.FormEvent) => {
     e.preventDefault();
 
+    if (!otpForm.code.trim()) {
+      toast.error("Please enter the OTP code");
+      return;
+    }
+
+    if (otpForm.code.length !== 6) {
+      toast.error("OTP must be 6 digits");
+      return;
+    }
+
+    const phone = normalizePhone(otpForm.countryCode, otpForm.phoneNumber);
+    if (!phone) {
+      toast.error("Please enter a valid phone number");
+      return;
+    }
+
     await verifyOtpLogin({
       variables: {
-        phone: normalizePhone(otpForm.countryCode, otpForm.phoneNumber),
+        phone,
         code: otpForm.code,
       },
     });
@@ -165,7 +219,11 @@ const LoginPage = () => {
               <div className="mt-8 grid grid-cols-2 rounded-2xl bg-slate-100 p-1 dark:bg-slate-950">
                 <button
                   type="button"
-                  onClick={() => setLoginMode("password")}
+                  onClick={() => {
+                    setLoginMode("password");
+                    setOtpSent(false);
+                    setOtpForm((prev) => ({ ...prev, code: "" }));
+                  }}
                   className={`rounded-xl px-4 py-2 text-sm font-semibold transition ${
                     loginMode === "password" ? "bg-white shadow-sm dark:bg-slate-900 dark:text-white" : "text-slate-500 dark:text-slate-400"
                   }`}

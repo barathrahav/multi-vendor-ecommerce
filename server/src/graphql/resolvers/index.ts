@@ -8,6 +8,7 @@ import { userResolvers } from "./user.resolver";
 import { notificationResolvers } from "./notification.resolver";
 import { wishlistResolvers } from "./wishlist.resolver";
 import { analyticsResolvers } from "./analytics.resolver";
+import { carouselResolvers } from "./carousel.resolver";
 import { relationResolvers } from "../relation.resolver";
 
 export const resolvers = {
@@ -26,6 +27,7 @@ export const resolvers = {
     ...notificationResolvers.Query,
     ...wishlistResolvers.Query,
     ...analyticsResolvers.Query,
+    ...carouselResolvers.Query,
 
   },
 
@@ -39,6 +41,7 @@ export const resolvers = {
     ...userResolvers.Mutation,
     ...notificationResolvers.Mutation,
     ...wishlistResolvers.Mutation,
+    ...carouselResolvers.Mutation,
   },
 
   ...relationResolvers,

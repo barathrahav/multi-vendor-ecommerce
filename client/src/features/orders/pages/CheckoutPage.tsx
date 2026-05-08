@@ -17,6 +17,46 @@ import type { PlaceOrderResponse } from "../types/order.types";
 import { reportError } from "../../../lib/errors";
 import { clearCartCache } from "../../cart/utils/cartCache";
 
+interface RazorpaySuccessResponse {
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+}
+
+interface RazorpayFailureResponse {
+  error?: {
+    description?: string;
+    reason?: string;
+  };
+}
+
+interface RazorpayOptions {
+  key: string;
+  amount: number;
+  currency: string;
+  name: string;
+  description: string;
+  order_id: string;
+  handler: (response: RazorpaySuccessResponse) => Promise<void>;
+  modal: {
+    ondismiss: () => Promise<void>;
+  };
+}
+
+interface RazorpayInstance {
+  on: (
+    event: "payment.failed",
+    handler: (response: RazorpayFailureResponse) => Promise<void>
+  ) => void;
+  open: () => void;
+}
+
+declare global {
+  interface Window {
+    Razorpay: new (options: RazorpayOptions) => RazorpayInstance;
+  }
+}
+
 const CheckoutPage = () => {
   const navigate = useNavigate();
   const apolloClient = useApolloClient();
@@ -74,14 +114,14 @@ const CheckoutPage = () => {
 
       toast.success("Payment gateway ready", { id: toastId });
 
-      const options = {
+      const options: RazorpayOptions = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount: amount * 100,
         currency: "INR",
         name: "E-Commerce",
         description: "Order Payment",
         order_id: razorpayOrderId,
-        handler: async function (response: any) {
+        handler: async function (response) {
           const verifyToastId = toast.loading("Verifying payment...");
           const latestOrderId = localStorage.getItem("latestOrderId");
 
@@ -121,8 +161,8 @@ const CheckoutPage = () => {
         },
       };
 
-      const rzp = new (window as any).Razorpay(options);
-      rzp.on("payment.failed", async function (response: any) {
+      const rzp = new window.Razorpay(options);
+      rzp.on("payment.failed", async function (response) {
         const latestOrderId = localStorage.getItem("latestOrderId") || orderId;
         const reason =
           response?.error?.description ||

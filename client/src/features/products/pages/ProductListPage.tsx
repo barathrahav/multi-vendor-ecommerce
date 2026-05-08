@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import { useQuery } from "@apollo/client/react";
 import { useSearchParams } from "react-router-dom";
+import { useAuth } from "../../auth/hooks/useAuth";
 
 import ProductCard from "../components/ProductCard";
 import ProductCardSkeleton from "../components/ProductCardSkeleton";
@@ -10,6 +11,7 @@ import type {
   CategoriesResponse,
   ProductsResponse,
   ProductsVariables,
+  WishlistResponse,
 } from "../types/product.types";
 import { getErrorMessage } from "../../../lib/errors";
 
@@ -21,6 +23,7 @@ const sortOptions = [
 
 const ProductListPage = () => {
   const [searchParams, setSearchParams] = useSearchParams();
+  const { role } = useAuth();
 
   const selectedSort =
     sortOptions.find((o) => o.value === searchParams.get("sort")) ?? sortOptions[0];
@@ -43,13 +46,13 @@ const ProductListPage = () => {
 
   const { data: categoriesData } = useQuery<CategoriesResponse>(GET_CATEGORIES);
 
-  const { data: wishlistData } = useQuery<any>(GET_MY_WISHLIST, {
-    skip: !localStorage.getItem("token"),
+  const { data: wishlistData } = useQuery<WishlistResponse>(GET_MY_WISHLIST, {
+    skip: role !== "CUSTOMER",
   });
 
   const products = data?.products.items ?? [];
   const wishedProductIds =
-    wishlistData?.myWishlist.map((item: any) => item.product.id) ?? [];
+    wishlistData?.myWishlist.map((item) => item.product.id) ?? [];
 
   const totalPages = data?.products.totalPages ?? 1;
 
